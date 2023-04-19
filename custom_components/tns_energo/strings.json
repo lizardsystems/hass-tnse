@@ -1,0 +1,85 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "account": "[%key:common::config_flow::data::account%]"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]",
+      "no_devices": "[%key:common::config_flow::error::no_devices%]"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured%]",
+      "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]"
+    }
+  },
+  "device_automation": {
+    "action_type": {
+      "send_readings": "[%key:common::device_automation::action_type::send_readings%]",
+      "get_bill": "[%key:common::device_automation::action_type::get_bill%]",
+      "refresh": "[%key:common::device_automation::action_type::refresh%]"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "account": {
+        "name": "[%key:component::sensor::entity_component::account::name%]"
+      },
+      "cost": {
+        "name": "[%key:component::sensor::entity_component::cost::name%]"
+      },
+      "cost_date": {
+        "name": "[%key:component::sensor::entity_component::cost_date::name%]"
+      },
+      "balance": {
+        "name": "[%key:component::sensor::entity_component::balance::name%]"
+      },
+      "meter": {
+        "name": "[%key:component::sensor::entity_component::meter::name%]"
+      },
+      "readings_date": {
+        "name": "[%key:component::sensor::entity_component::readings_date::name%]"
+      },
+      "current_timestamp": {
+        "name": "[%key:component::sensor::entity_component::current_timestamp::name%]"
+      },
+      "readings_closed": {
+        "name": "[%key:component::sensor::entity_component::readings_closed::name%]"
+      },
+      "readings_prev": {
+        "name": "[%key:component::sensor::entity_component::readings_prev::name%]"
+      },
+      "t1_readings_closed": {
+        "name": "[%key:component::sensor::entity_component::t1_readings_closed::name%]"
+      },
+      "t1_readings_prev": {
+        "name": "[%key:component::sensor::entity_component::t1_readings_prev::name%]"
+      },
+      "t2_readings_closed": {
+        "name": "[%key:component::sensor::entity_component::t2_readings_closed::name%]"
+      },
+      "t2_readings_prev": {
+        "name": "[%key:component::sensor::entity_component::t2_readings_prev::name%]"
+      },
+      "t3_readings_closed": {
+        "name": "[%key:component::sensor::entity_component::t3_readings_closed::name%]"
+      },
+      "t3_readings_prev": {
+        "name": "[%key:component::sensor::entity_component::t3_readings_prev::name%]"
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "[%key:component::button::entity_component::refresh::name%]"
+      },
+      "get_bill": {
+        "name": "[%key:component::button::entity_component::get_bill::name%]"
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+    "domain": "tns_energo",
+    "name": "TNS-Energo",
+    "codeowners": ["@lizardsystems"],
+    "config_flow": true,
+    "dependencies": [],
+    "documentation": "https://github.com/lizardsystems/hass-tnse",
+    "homekit": {},
+    "iot_class": "cloud_polling",
+    "issue_tracker": "https://github.com/lizardsystems/hass-tnse/issues",
+    "loggers": ["aiotnse", "tns_energo"],
+    "requirements": ["aiotnse==1.1.1"],
+    "ssdp": [],
+    "version": "1.0.0",
+    "zeroconf": []
+}
+

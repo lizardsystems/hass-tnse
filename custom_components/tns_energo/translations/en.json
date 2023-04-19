@@ -1,0 +1,87 @@
+{
+  "title": "TNS-Energo",
+  "config": {
+    "abort": {
+      "already_configured": "Account is already configured",
+      "reauth_successful": "Re-authentication was successful"
+    },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unexpected error",
+      "no_devices": "No devices found in account"
+    },
+    "step": {
+      "user": {
+        "title": "Fill in your TNS-Energo account information",
+        "data": {
+          "account": "Account number"
+        }
+      }
+    }
+  },
+  "device_automation": {
+    "action_type": {
+      "send_readings": "Send readings",
+      "get_bill": "Get bill",
+      "refresh": "Refresh information"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "account": {
+        "name": "Account"
+      },
+      "cost": {
+        "name": "Amount to be paid"
+      },
+      "cost_date": {
+        "name": "Account Date"
+      },
+      "balance": {
+        "name": "Balance"
+      },
+      "meter": {
+        "name": "Meter"
+      },
+      "readings_date": {
+        "name": "Readings date"
+      },
+      "current_timestamp": {
+        "name": "Last update"
+      },
+      "readings_closed": {
+        "name": "Closed readings"
+      },
+      "readings_prev": {
+        "name": "Previous readings"
+      },
+      "readings_closed_t1": {
+        "name": "T1 Closed readings"
+      },
+      "readings_prev_t1": {
+        "name": "T1 Previous readings"
+      },
+      "readings_closed_t2": {
+        "name": "T2 Closed readings"
+      },
+      "readings_prev_t2": {
+        "name": "T2 Previous readings"
+      },
+      "readings_closed_t3": {
+        "name": "T3 Closed readings"
+      },
+      "readings_prev_t3": {
+        "name": "T3 Previous readings"
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "Refresh"
+      },
+      "get_bill": {
+        "name": "Get bill"
+      }
+    }
+  }
+}
