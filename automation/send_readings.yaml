@@ -1,0 +1,24 @@
+alias: Отправить показания по электроэнергии
+description: ""
+trigger:
+  - platform: time
+    at: "01:00:00"
+condition:
+  - condition: template
+    value_template: "{{ now().day == 24 }}"
+action:
+  - service: tns_energo.send_readings
+    data:
+      device_id: <YOUR_DEVICE_ID>
+      t1: <YOUR_SENSOR_T1>
+      t2: <YOUR_SENSOR_T2>
+    alias: "ТНС-Энерго: Отправить показания"
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: tns_energo.refresh
+    data:
+      device_id: <YOUR_DEVICE_ID>
+mode: single

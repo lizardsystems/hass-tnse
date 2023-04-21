@@ -39,11 +39,11 @@ class TNSECoordinator(DataUpdateCoordinator):
     account: str
 
     def __init__(
-        self,
-        hass: HomeAssistant,
-        logger: logging.Logger,
-        *,
-        config_entry: ConfigEntry,
+            self,
+            hass: HomeAssistant,
+            logger: logging.Logger,
+            *,
+            config_entry: ConfigEntry,
     ) -> None:
         """Initialise a custom coordinator."""
         self.account = str(config_entry.data.get(CONF_ACCOUNT))
@@ -182,7 +182,7 @@ class TNSECoordinator(DataUpdateCoordinator):
 
     @async_api_request_handler
     async def _async_send_readings(
-        self, new_readings: list[dict[str, Any]]
+            self, new_readings: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Send readings with handle errors by decorator"""
         _data = await self._api.async_send_readings(self.account, new_readings)

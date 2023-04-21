@@ -1,0 +1,48 @@
+alias: Уведомление об отправленных показаниях
+description: ""
+trigger:
+  - platform: event
+    event_type: tns_energo_send_readings_completed
+condition: []
+action:
+  - service: telegram_bot.send_message
+    data:
+      authentication: digest
+      parse_mode: markdown
+      title: >-
+        Показания для {{device_attr(trigger.event.data.device_id,
+        'name_by_user') or  device_attr(trigger.event.data.device_id, 'name')
+        }}  отправлены {{ now().strftime('%d-%m-%Y %H:%M')}}
+      message: >-
+        Показания: {% for k,v in trigger.event.data.readings.items()
+        %}{{k}}={{v}}{% if not loop.last %}, {% endif %}{% endfor %} 
+
+        Начислено: {{ trigger.event.data.balance['НАЧИСЛЕНОПОИПУ'] }} руб
+
+        {{ 'Переплата' if trigger.event.data.balance['ЗАДОЛЖЕННОСТЬ']|float <0  
+        else 'Задолженность' }}: {{
+        trigger.event.data.balance['ЗАДОЛЖЕННОСТЬ']|float|abs }} руб 
+
+        {{ 'Сумма к оплате' if trigger.event.data.balance['СУММАКОПЛАТЕ']|float
+        >0   else 'Олата не требуется. Остаток на счете' }}: {{
+        trigger.event.data.balance['СУММАКОПЛАТЕ']|float|abs }} руб
+  - service: notify.persistent_notification
+    data:
+      title: >-
+        Показания для {{device_attr(trigger.event.data.device_id,
+        'name_by_user') or  device_attr(trigger.event.data.device_id, 'name') }}
+        отправлены {{ now().strftime("%d-%m-%Y %H:%M")}}
+      message: >-
+        Показания: {% for k,v in trigger.event.data.readings.items()
+        %}{{k}}={{v}}{% if not loop.last %}, {% endif %}{% endfor %} 
+
+        Начислено: {{ trigger.event.data.balance['НАЧИСЛЕНОПОИПУ'] }} руб
+
+        {{ 'Переплата' if trigger.event.data.balance['ЗАДОЛЖЕННОСТЬ']|float <0  
+        else 'Задолженность' }}: {{
+        trigger.event.data.balance['ЗАДОЛЖЕННОСТЬ']|float|abs }} руб 
+
+        {{ 'Сумма к оплате' if trigger.event.data.balance['СУММАКОПЛАТЕ']|float
+        >0   else 'Олата не требуется. Остаток на счете' }}: {{
+        trigger.event.data.balance['СУММАКОПЛАТЕ']|float|abs }} руб
+mode: single

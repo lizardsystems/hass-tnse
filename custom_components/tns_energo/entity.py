@@ -26,15 +26,15 @@ class TNSEBaseCoordinatorEntity(CoordinatorEntity[TNSECoordinator]):
     _attr_has_entity_name = True
 
     def __init__(
-        self, coordinator: TNSECoordinator, entity_description: EntityDescription
+            self, coordinator: TNSECoordinator, entity_description: EntityDescription
     ) -> None:
         """Initialize the Entity."""
         super().__init__(coordinator=coordinator)
         self.entity_description = entity_description
 
         if (
-            CONF_READINGS in self.coordinator.data
-            and len(self.coordinator.data[CONF_READINGS]) > 0
+                CONF_READINGS in self.coordinator.data
+                and len(self.coordinator.data[CONF_READINGS]) > 0
         ):
             _model = self.coordinator.data[CONF_READINGS][0].get(ATTR_MODEL_PU)
         else:

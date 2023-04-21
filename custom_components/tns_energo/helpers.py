@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 async def async_get_device_entry_by_device_id(
-    hass: HomeAssistant, device_id: str | None
+        hass: HomeAssistant, device_id: str | None
 ) -> dr.DeviceEntry:
     if device_id is None:
         raise ValueError("Device is undefined")
@@ -30,7 +30,7 @@ async def async_get_device_entry_by_device_id(
 
 
 async def async_get_device_friendly_name(
-    hass: HomeAssistant, device_id: str | None
+        hass: HomeAssistant, device_id: str | None
 ) -> str | None:
     """Get device friendly name"""
 
@@ -39,7 +39,7 @@ async def async_get_device_friendly_name(
 
 
 async def async_get_coordinator(
-    hass: HomeAssistant, device_id: str | None
+        hass: HomeAssistant, device_id: str | None
 ) -> TNSECoordinator:
     """Get coordinator for device id"""
 

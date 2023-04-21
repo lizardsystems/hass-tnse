@@ -5,8 +5,8 @@ import asyncio
 from collections.abc import Awaitable, Callable, Coroutine
 from functools import wraps
 from random import randrange
-from typing import TypeVar, ParamSpec, Concatenate, Any
 from typing import TYPE_CHECKING
+from typing import TypeVar, ParamSpec, Concatenate, Any
 
 from aiotnse.exceptions import TNSEApiError, TNSEAuthError
 from aiotnse.helpers import is_error_response
@@ -18,8 +18,7 @@ from homeassistant.helpers.update_coordinator import UpdateFailed
 from .const import API_TIMEOUT, API_MAX_TRIES, API_RETRY_DELAY
 
 if TYPE_CHECKING:
-    from .coordinator import TNSECoordinator
-
+    pass
 
 _TNSECoordinatorT = TypeVar("_TNSECoordinatorT", bound="TNSECoordinator")
 _R = TypeVar("_R")
@@ -27,13 +26,13 @@ _P = ParamSpec("_P")
 
 
 def async_api_request_handler(
-    method: Callable[Concatenate[_TNSECoordinatorT, _P], Awaitable[_R]]
+        method: Callable[Concatenate[_TNSECoordinatorT, _P], Awaitable[_R]]
 ) -> Callable[Concatenate[_TNSECoordinatorT, _P], Coroutine[Any, Any, _R]]:
     """Decorator to handle API errors."""
 
     @wraps(method)
     async def wrapper(
-        self: _TNSECoordinatorT, *args: _P.args, **kwargs: _P.kwargs
+            self: _TNSECoordinatorT, *args: _P.args, **kwargs: _P.kwargs
     ) -> _R:
         """Wrap an API method."""
         try:

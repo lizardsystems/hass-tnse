@@ -51,7 +51,7 @@ ACTION_SCHEMA_MAP = {
 
 
 async def async_get_actions(
-    hass: HomeAssistant, device_id: str
+        hass: HomeAssistant, device_id: str
 ) -> list[dict[str, str]]:
     """List device actions for tns_energo devices."""
     actions = []
@@ -68,7 +68,7 @@ async def async_get_actions(
 
 
 async def async_call_action_from_config(
-    hass: HomeAssistant, config: dict, variables: dict, context: Context | None
+        hass: HomeAssistant, config: dict, variables: dict, context: Context | None
 ) -> None:
     """Execute a device action."""
     service_data = {CONF_DEVICE_ID: config[CONF_DEVICE_ID]}
@@ -91,7 +91,7 @@ async def async_call_action_from_config(
 
 
 async def async_validate_action_config(
-    hass: HomeAssistant, config: ConfigType
+        hass: HomeAssistant, config: ConfigType
 ) -> ConfigType:
     """Validate config."""
     schema = ACTION_SCHEMA_MAP.get(config[CONF_TYPE], DEFAULT_ACTION_SCHEMA)

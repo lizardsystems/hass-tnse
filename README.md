@@ -4,10 +4,10 @@
 
 Этот репозиторий содержит настраиваемый компонент для Home Assistant для отображения данных из сервиса THC-Энерго.
 
-## Установка
+# Установка
 
-**Способ 1.** Через [HACS](https://hacs.xyz/) > Интеграции > Добавить пользовательский
-репозиторий > https://github.com/lizardsystems/hass-tnse/ > **TNS-Energo** > Установить
+**Способ 1.** Через [HACS](https://hacs.xyz/) &rarr; Интеграции &rarr; Добавить пользовательский
+репозиторий &rarr; https://github.com/lizardsystems/hass-tnse/ &rarr; **TNS-Energo** &rarr; Установить
 
 **Способ 2.** Вручную скопируйте папку `tns_energo`
 из [latest release](https://github.com/lizardsystems/hass-tnse/releases/latest) в
@@ -15,10 +15,12 @@
 
 После установки необходимо перегрузить Home Assistant
 
-## Настройка
+# Настройка
 
-> [Настройки](https://my.home-assistant.io/redirect/config) > Устройства и службы > [Интеграции](https://my.home-assistant.io/redirect/integrations) > [Добавить интеграцию](https://my.home-assistant.io/redirect/config_flow_start?domain=tns_energo) >
-> Поиск **TNS-Energo**
+[Настройки](https://my.home-assistant.io/redirect/config) &rarr; Устройства и службы
+&rarr; [Интеграции](https://my.home-assistant.io/redirect/integrations)
+&rarr; [Добавить интеграцию](https://my.home-assistant.io/redirect/config_flow_start?domain=tns_energo) &rarr; Поиск *
+*TNS-Energo**
 
 или нажмите:
 
@@ -26,7 +28,8 @@
 
 ![Установка tns_energo 1](images/setup-1.png)
 
-Появится окно настройки интеграции, укажите в нем лицевой счет в сервисе [THC-Энерго](https://corp.tns-e.ru/onlayn-servisy/).
+Появится окно настройки интеграции, укажите в нем лицевой счет в
+сервисе [THC-Энерго](https://corp.tns-e.ru/onlayn-servisy/).
 
 ![Установка tns_energo 2](images/setup-2.png)
 
@@ -50,13 +53,13 @@
 
 ![Установка tns_energo 7](images/setup-7.png)
 
-Общий вид устройства в Home Assistant. 
-В зависимости от тарифности лицевого счета (однтарифный, двухтарифный, трехтарифный) 
-будут добавлены сенсоры потребления электроэнергии с постфиксом T1,T2 и T3. 
+Общий вид устройства в Home Assistant.
+В зависимости от тарифности лицевого счета (однтарифный, двухтарифный, трехтарифный)
+будут добавлены сенсоры потребления электроэнергии с постфиксом T1,T2 и T3.
 
 ![Установка tns_energo 8](images/setup-8.png)
 
-## Сенсоры
+# Сенсоры
 
 Создаются следующие объекты:
 
@@ -121,31 +124,34 @@
 
 ![Установка tns_energo 11](images/setup-11.png)
 
-### Кнопки
+## Кнопки
 
 - Кнопка для немедленного обновления информации
+    - Вызывает сервис `tns_energo.refresh`, сервис обновления информации
 - Кнопка для запроса счета за прошлый месяц
+    - Вызывает сервис `tns_energo.get_bill`, сервис запроса счета за прошлый месяц
 
 ![Установка tns_energo 12](images/setup-12.png)
 
-### Сервисы
+# Сервисы
 
-Также интеграция публикует три сервиса
+Интеграция ТНС-Энерго публикует три сервиса:
 
-- Получить счет `tns_energo.get_bill`
-- Обновить информацию `tns_energo.refresh`
-- Отправить показания `tns_energo.send_readings`
+- `tns_energo.get_bill` - сервис получения счета за прошлый месяц
+- `tns_energo.refresh` - сервис обновления информации
+- `tns_energo.send_readings` - сервис отправки показаний
 
 ![Сервисы](images/service-1.png)
 
-#### Сервис: Получить счет
+## tns_energo.get_bill - ТНС-Энерго: Получить счет
 
 Сервис позволяет запросить счет об оказанных услугах за прошлый месяц.
 
 ![Сервисы](images/service-2.png)
 
-Параметры: 
- - device_id - Устройство Лицевой счет  
+Параметры:
+
+- **device_id** - Устройство Лицевой счет
 
 Вызов сервиса в формате yaml
 
@@ -154,14 +160,16 @@ service: tns_energo.get_bill
 data:
   device_id: c535106f017be8b830d448abd526a977
 ```
-или с использованием имени устройства
+
+Можно сделать вызов сервиса с использованием имени устройства
 
 ```yaml
 service: tns_energo.get_bill
 data:
   device_id: '{{device_id("ЛC №611000000000 (Офис)")}}'
 ```
-или с использованием сенсора этого устройства
+
+или с использованием одного из сенсоров этого устройства
 
 ```yaml
 service: tns_energo.get_bill
@@ -169,22 +177,18 @@ data:
   device_id: '{{device_id("sensor.tns_energo_611000000000_account")}}'
 ```
 
-После выполнения сервиса создается уведомление в интерфейсе Home Assistant  
+После завершения выполнения сервиса генерируется событие **tns_energo_get_bill_completed**,
+в случае ошибки генерируется событие **tns_energo_get_bill_failed**.
 
-![Сервисы](images/service-3.png)
+## tns_energo.refresh - ТНС-Энерго: Обновить информацию
 
-![Сервисы](images/service-4.png)
-
-После нажатия ссылки начнется скачивания pdf файла со счетом для указанного лицевого счета.
-
-#### Сервис: Обновить информацию
-
-Сервис запрашивает информацию через API и обновляет состояние всех сенсоров.
+Сервис запрашивает информацию через API и обновляет все сенсоры.
 
 ![Сервисы](images/service-5.png)
 
-Параметры: 
- - device_id - Устройство Лицевой счет  
+Параметры:
+
+- **device_id** - Устройство Лицевой счет
 
 Вызов сервиса в формате yaml
 
@@ -194,23 +198,27 @@ data:
   device_id: c535106f017be8b830d448abd526a977
 ```
 
-После выполнения работы службы вся информация в устройстве будет обновлена.
+Вызовы также могут быть выполнены с использованием имени устройства или имени одного из сенсоров.
 
-#### Сервис: Отправить показания
+После завершения выполнения сервиса генерируется событие **tns_energo_refresh_completed**,
+в случае ошибки генерируется событие **tns_energo_refresh_failed**.
 
-Сервис отправляет показания в ТНС Энерго из указанных источников данных.
+## tns_energo.send_readings - ТНС-Энерго: Отправить показания
+
+Сервис отправляет показания в ТНС Энерго из указанных сенсоров.
+
 ![Сервисы](images/service-6.png)
 
-Параметры: 
- 
- - device_id - Устройство Лицевой счет  	
- - t1 - Показания по тарифу T1, кВт⋅ч (Обязательный) Сенсор со значением потребления 	
- - t2 - Показания по тарифу T2, кВт⋅ч (Необязательный) Сенсор со значением потребления  	
- - t3 - Показания по тарифу T3, кВт⋅ч (Необязательный) Сенсор со значением потребления
+Параметры:
 
-Для однотарифных счетчиков необходимо указать только T1. 
+- **device_id** - Устройство Лицевой счет
+- **t1** - Показания по тарифу T1, кВт⋅ч (Обязательный) Сенсор со значением потребления
+- **t2** - Показания по тарифу T2, кВт⋅ч (Необязательный) Сенсор со значением потребления
+- **t3** - Показания по тарифу T3, кВт⋅ч (Необязательный) Сенсор со значением потребления
 
-Для двухтарифных счетчиков необходимо указать T1 и T2, для трехтарифных соответственно T1,T2 и T3
+Для однотарифных счетчиков необходимо указать только t1.
+
+Для двухтарифных счетчиков необходимо указать t1 и t2, для трехтарифных соответственно t1,t2 и t3
 
 В случае неправильного указания параметров, например, для двухтарифного указан только T1, сервис вернет ошибку.
 
@@ -219,125 +227,150 @@ data:
 ```yaml
 service: tns_energo.send_readings
 data:
-  device_id: c535106f017be8b830d448abd526a977
+  device_id: '{{device_id("ЛC №611000000000 (Офис)")}}'
   t1: sensor.neva_mt_114_wi_fi_22222222_energy_t1_a
   t2: sensor.neva_mt_114_wi_fi_22222222_energy_t2_a
 
 ```
 
-После выполнения сервиса придет уведомление в интерфейсе Home Assistant с переданными сведениями и все сенсоры устройства будут обновлены.
+После завершения выполнения сервиса генерируется событие **tns_energo_send_readings_completed**,
+в случае ошибки генерируется событие **tns_energo_send_readings_failed**.
 
-![Сервисы](images/service-7.png)
+# События
 
-![Сервисы](images/service-8.png)
+Интеграция генерирует следующие события:
 
-### События
-#### Событие: Информация обновлена
+- **tns_energo_refresh_completed** - сведения обновлены успешно
+- **tns_energo_get_bill_completed** - счет получен успешно
+- **tns_energo_send_readings_completed** - показания отправлены успешно
+- **tns_energo_refresh_failed** - возникла ошибка при обновлении сведений
+- **tns_energo_get_bill_failed** - возникла ошибка при получении счета
+- **tns_energo_send_readings_failed** - возникла ошибка при отправке показаний
 
-После выполнения службы обновления информации генерируется события **tns_energo_refresh**, со следующими свойствами:
+## Событие: tns_energo_refresh_completed - Информация обновлена
+
+После выполнения службы обновления информации генерируется события **tns_energo_refresh_completed**, со следующими
+свойствами:
 
 ```yaml
-event_type: tns_energo_refresh
+event_type: tns_energo_refresh_completed
 data:
-  account: "611000000000"
-  friendly_name: ЛC №611000000000 (Офис)
-  title: Информация для "ЛC №611000000000 (Офис)" обновлена
-  message: Информация для "ЛC №611000000000 (Офис)" обновлена 18-04-2023 21:32
-  error: false
+  device_id: c535106f017be8b830d448abd526a977
 origin: LOCAL
-time_fired: "2023-04-18T18:32:32.878414+00:00"
+time_fired: "2023-04-21T17:18:09.428522+00:00"
 context:
-  id: 01GYAT79DJFA8J81WH1CE7GARE
+  id: 01GYJD548GAG83ZEDVGVCF1WKR
+  parent_id: null
+  user_id: 386a6cba68ca41a0923d3b94b2710bdc
+
+
+```
+
+## Событие: tns_energo_get_bill_completed - Счет получен
+
+После успешного выполнения службы получения счета генерируется события **tns_energo_get_bill_completed**, со следующими
+свойствами:
+
+```yaml
+event_type: tns_energo_get_bill_completed
+data:
+  device_id: c535106f017be8b830d448abd526a977
+  date: "2023-03-01"
+  url: https://lk.rostov.tns-e.ru/temp/20230421202104_611000000000.pdf
+origin: LOCAL
+time_fired: "2023-04-21T17:21:04.522054+00:00"
+context:
+  id: 01GYJDAV1YHYZV63JH1Q1RGYMK
   parent_id: null
   user_id: 386a6cba68ca41a0923d3b94b2710bdc
 
 ```
-#### Событие: Счет получен
+ 
+## Событие: tns_energo_send_readings_completed - Показания отправлены
 
-После выполнения службы получения счета генерируется события **tns_energo_get_bill**, со следующими свойствами:
+После успешного выполнения службы отправки показаний генерируется события **tns_energo_send_readings_completed**, со следующими
+свойствами:
 
 ```yaml
-event_type: tns_energo_get_bill
+event_type: tns_energo_send_readings_completed
 data:
-  account: "611000000000"
-  friendly_name: ЛC №611000000000 (Офис)
-  url: https://lk.rostov.tns-e.ru/temp/20230418222502_611000000000.pdf
-  title: Счет для "ЛC №611000000000 (Офис)" за 03-2023
-  message: >-
-    [Скачать счет для "ЛC №611000000000
-    (Офис)"](https://lk.rostov.tns-e.ru/temp/20230418222502_611000000000.pdf) за
-    03-2023
-  error: false
+  device_id: 0c783f4eaaf44085fe302973c54dd4d4
+  readings:
+    t1: 1056
+    t2: 488
+  balance:
+    ВХСАЛЬДО: "52.57"
+    ЗАДОЛЖЕННОСТЬ: "-577.43"
+    ЗАДОЛЖЕННОСТЬОТКЛ: "0.00"
+    ЗАДОЛЖЕННОСТЬПЕНИ: "0"
+    ЗАДОЛЖЕННОСТЬПОДКЛ: "0.00"
+    ЗАКРЫТЫЙМЕСЯЦ: 01.04.23
+    НАЧИСЛЕНОПОИПУ: "830.49"
+    ПЕРЕРАСЧЕТ: "0"
+    ПРОГНОЗПОИПУ: "0"
+    СУМАПОТЕРИ: "0"
+    СУММАКОПЛАТЕ: "253.06"
+    СУММАОДНПРОГНОЗ: "0"
+    СУММАПЕНИПРОГНОЗ: "0"
+    СУММАПЛАТЕЖЕЙ: "630"
+    СУММАПРОГНОЗНАЧ: "0.00"
+    ФНАЧИСЛЕНОПОИПУ: "1"
+    KOPLATEPSEVDO: "253.06"
 origin: LOCAL
-time_fired: "2023-04-18T19:25:02.244026+00:00"
+time_fired: "2023-04-21T17:24:11.379545+00:00"
 context:
-  id: 01GYAX7N6FRGYBES5HT483WMWX
+  id: 01GYJDGDDY8H99X6VFVEQ19WNK
   parent_id: null
   user_id: 386a6cba68ca41a0923d3b94b2710bdc
 
 ```
+ - `readings` - переданные показания.
+ - `balance` - предварительный расчет по переданным показаниям. 
 
-#### Событие: Показания отправлены
+## Событие: tns_energo_*_failed - Запрос к сервису выполнился с ошибкой
 
-После выполнения службы отправки показаний генерируется события **tns_energo_send_readings**, со следующими свойствами:
+В случае выполнения сервиса с ошибкой интеграция генерирует следующие события:
+
+- **tns_energo_refresh_failed** - возникла ошибка при обновлении сведений
+- **tns_energo_get_bill_failed** - возникла ошибка при получении счета
+- **tns_energo_send_readings_failed** - возникла ошибка при отправке показаний
+
+Ниже пример такого события  
 
 ```yaml
-event_type: tns_energo_send_readings
+event_type: tns_energo_refresh_failed
 data:
-  account: "611000000000"
-  friendly_name: ЛC №611000000000 (Офис)
-  t1: 1049
-  t2: 483
-  ВХСАЛЬДО: "52.57"
-  ЗАДОЛЖЕННОСТЬ: "-577.43"
-  ЗАДОЛЖЕННОСТЬОТКЛ: "0.00"
-  ЗАДОЛЖЕННОСТЬПЕНИ: "0"
-  ЗАДОЛЖЕННОСТЬПОДКЛ: "0.00"
-  ЗАКРЫТЫЙМЕСЯЦ: 01.04.23
-  НАЧИСЛЕНОПОИПУ: "777.26"
-  ПЕРЕРАСЧЕТ: "0"
-  ПРОГНОЗПОИПУ: "0"
-  СУМАПОТЕРИ: "0"
-  СУММАКОПЛАТЕ: "199.83"
-  СУММАОДНПРОГНОЗ: "0"
-  СУММАПЕНИПРОГНОЗ: "0"
-  СУММАПЛАТЕЖЕЙ: "630"
-  СУММАПРОГНОЗНАЧ: "0.00"
-  ФНАЧИСЛЕНОПОИПУ: "1"
-  KOPLATEPSEVDO: "199.83"
-  title: Показания для "ЛC №611000000000 (Офис)" отправлены 18-04-2023 23:41
-  message: >-
-    Переданы показания "ЛC №611000000000 (Офис)":  t1=1049, t2=483. Начислено:
-    777.26 руб, Переплата: 577.43 руб, Сумма к оплате: 199.83 руб,
-  error: false
+  device_id: c535106f017be8b830d448abd526a977
+  error: "Error description"
 origin: LOCAL
-time_fired: "2023-04-18T20:41:09.427423+00:00"
+time_fired: "2023-04-21T17:18:09.428522+00:00"
 context:
-  id: 01GYB1JX9XPF1188M9HSK5TH7M
-  parent_id: 01GYB1JX9X6N43WJVR0ESXFH58
-  user_id: null
-
+  id: 01GYJD548GAG83ZEDVGVCF1WKR
+  parent_id: null
+  user_id: 386a6cba68ca41a0923d3b94b2710bdc
 ```
 
-## Автоматизации
+# Автоматизации
 
-Для отправки показаний и получения счета по расписанию созданы автоматизации с использованием описанных выше служб.
-Также созданы автоматизации для отправки уведомлений в Телеграм.
+Для отправки показаний и получения счета по расписанию можно создать автоматизации с использованием описанных выше служб, а 
+также автоматизации для отправки уведомлений в Телеграм, и веб интерфейс Home Assistant.
 
 ![Автоматизация](images/automation-1.png)
 
-### Вызов сервисов по расписанию
+## Вызов сервисов по расписанию
 
 Для вызова сервиса по расписанию используется платформа Time с дополнительным условием на дату.
 
-#### Отправка показаний в ТНС-Энерго
+### Отправка показаний в ТНС-Энерго
 
-Показания отправляются 24 числа каждого месяца в 1 час ночи. 
+Показания будут отправляться 24 числа каждого месяца в 1 час ночи, через минуту после отправки показаний
+будут обновляться сведения лицевого счета.
 
 ![Автоматизация](images/automation-4.png)
 
 ![Автоматизация](images/automation-5.png)
 
+![Автоматизация](images/automation-6.png)
 
 Автоматизация в формате yaml
 
@@ -349,21 +382,31 @@ trigger:
     at: "01:00:00"
 condition:
   - condition: template
-    value_template: 
+    value_template: "{{ now().day == 24 }}"
 action:
   - service: tns_energo.send_readings
     data:
-      device_id: c535106f017be8b830d448abd526a977
+      device_id: 0c783f4eaaf44085fe302973c54dd4d4
       t1: sensor.neva_mt_114_wi_fi_22222222_energy_t1_a
       t2: sensor.neva_mt_114_wi_fi_22222222_energy_t2_a
-    alias: "ТНС-Энерго: Отправить показания (Офис)"
+    alias: "ТНС-Энерго: Отправить показания (Дом)"
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: tns_energo.refresh
+    data:
+      device_id: 0c783f4eaaf44085fe302973c54dd4d4
 mode: single
 ```
-в строке `"{{ now().day == 24 }}"` вы можете указать свою дату и свое время в строке `at: "01:00:00"`
 
-#### Получение счета от ТНС-Энерго
+Вы можете указать свою дату для этого скорректируйте строку `"{{ now().day == 24 }}"`, 
+а также можно изменить время для этого в строке `at: "01:00:00"` укажите нужное время.
 
-Счет запрашивается 5 числа каждого месяца в 1 час ночи.
+### Получение счета от ТНС-Энерго
+
+Счет будет запрашиваться 5 числа каждого месяца в 1 час ночи.
 
 ![Автоматизация](images/automation-2.png)
 
@@ -386,75 +429,181 @@ action:
       device_id: c535106f017be8b830d448abd526a977
 mode: single
 ```
+Вы можете указать свою дату для этого скорректируйте строку `"{{ now().day == 5 }}"`, 
+а также можно изменить время для этого в строке `at: "01:00:00"` укажите нужное время.
 
-в строке `"{{ now().day == 5 }}"` вы можете указать свою дату и свое время в строке `at: "01:00:00"`
+## Уведомления
 
-### Уведомления
+Тригером для отправки уведомлений является соответсвующее событие **tns_energo_*_completed**.
 
-Тригером для отправки уведомлений в Телеграм является соответсвующее событие, 
-данные для сообщений передаются в самом событии в тегах message и title.
-
-Также вы можете самостоятельно сформировать сообщение из других данных предоставленных в теле события.
-
-#### Уведомления о переданных сведениях в Телеграм
-
-![Автоматизация](images/notify-1.png)
+### Уведомление об отправленных показаниях в Телеграм и веб интерфейс Home Assistant
 
 Автоматизация в формате yaml
 
 ```yaml
-alias: Оповестить о переданных сведениях по электроэнергии в Телеграмм
+alias: Уведомление об отправленных показаниях
 description: ""
 trigger:
   - platform: event
-    event_type: tns_energo_send_readings
+    event_type: tns_energo_send_readings_completed
 condition: []
 action:
   - service: telegram_bot.send_message
     data:
-      message: "{{trigger.event.data.message}}"
-      title: "{{trigger.event.data.title}}"
+      authentication: digest
+      parse_mode: markdown
+      title: >-
+        Показания для {{device_attr(trigger.event.data.device_id,
+        'name_by_user') or  device_attr(trigger.event.data.device_id, 'name')
+        }}  отправлены {{ now().strftime('%d-%m-%Y %H:%M')}}
+      message: >-
+        Показания: {% for k,v in trigger.event.data.readings.items()
+        %}{{k}}={{v}}{% if not loop.last %}, {% endif %}{% endfor %} 
+
+        Начислено: {{ trigger.event.data.balance['НАЧИСЛЕНОПОИПУ'] }} руб
+
+        {{ 'Переплата' if trigger.event.data.balance['ЗАДОЛЖЕННОСТЬ']|float <0  
+        else 'Задолженность' }}: {{
+        trigger.event.data.balance['ЗАДОЛЖЕННОСТЬ']|float|abs }} руб 
+
+        {{ 'Сумма к оплате' if trigger.event.data.balance['СУММАКОПЛАТЕ']|float
+        >0   else 'Олата не требуется. Остаток на счете' }}: {{
+        trigger.event.data.balance['СУММАКОПЛАТЕ']|float|abs }} руб
+  - service: notify.persistent_notification
+    data:
+      title: >-
+        Показания для {{device_attr(trigger.event.data.device_id,
+        'name_by_user') or  device_attr(trigger.event.data.device_id, 'name') }}
+        отправлены {{ now().strftime("%d-%m-%Y %H:%M")}}
+      message: >-
+        Показания: {% for k,v in trigger.event.data.readings.items()
+        %}{{k}}={{v}}{% if not loop.last %}, {% endif %}{% endfor %} 
+
+        Начислено: {{ trigger.event.data.balance['НАЧИСЛЕНОПОИПУ'] }} руб
+
+        {{ 'Переплата' if trigger.event.data.balance['ЗАДОЛЖЕННОСТЬ']|float <0  
+        else 'Задолженность' }}: {{
+        trigger.event.data.balance['ЗАДОЛЖЕННОСТЬ']|float|abs }} руб 
+
+        {{ 'Сумма к оплате' if trigger.event.data.balance['СУММАКОПЛАТЕ']|float
+        >0   else 'Олата не требуется. Остаток на счете' }}: {{
+        trigger.event.data.balance['СУММАКОПЛАТЕ']|float|abs }} руб
 mode: single
 
+
 ```
+
 Результат выполнения - сообщение в Телеграм
 
 ![Автоматизация](images/telegram-1.png)
 
-#### Уведомления о счете за электроэнергию в Телеграм
+Результат выполнения - уведомление в Home Assistant
 
-![Автоматизация](images/notify-2.png)
+![Автоматизация](images/notify-1.png)
 
-![Автоматизация](images/notify-3.png)
 
-Дополнительно к тегам message и title, используется тег url, в котором хранится ссылка на документ
-
-Также вы можете самостоятельно сформировать сообщение из других данных предоставленных в теле события.
+### Уведомления о счете за электроэнергию
 
 Автоматизация в формате yaml
 
 ```yaml
-alias: Оповестить о счете за электроэнергию в Телеграм
+alias: Уведомление о счете за электроэнергию
 description: ""
 trigger:
   - platform: event
-    event_type: tns_energo_get_bill
-condition: []
+    event_type: tns_energo_get_bill_completed
+condition: [ ]
 action:
-  - service: telegram_bot.send_message
-    data:
-      message: "{{trigger.event.data.message}}"
-      title: "{{trigger.event.data.title}}"
+  # уведомление в Телеграм
   - service: telegram_bot.send_document
     data:
       authentication: digest
-      url: "{{trigger.event.data.url}}"
+      parse_mode: markdown
+      url: >-
+        {{trigger.event.data.url}}
+      caption: >-
+        Счет за электроэнергию для
+        {{device_attr(trigger.event.data.device_id, 'name_by_user') or 
+        device_attr(trigger.event.data.device_id, 'name') }}
+        за {{trigger.event.data.date}}
+  # уведомление в веб-интерфейсе  
+  - service: notify.persistent_notification
+    data:
+      message: >-
+        Скачать счет для 
+        [{{device_attr(trigger.event.data.device_id, 'name_by_user') or 
+        device_attr(trigger.event.data.device_id, 'name') }}]({{trigger.event.data.url}})
+        за {{trigger.event.data.date}}.
+
+      title: >-
+        Счет за электроэнергию для
+        {{device_attr(trigger.event.data.device_id, 'name_by_user') or 
+        device_attr(trigger.event.data.device_id, 'name') }}
+        за {{trigger.event.data.date}}
+
 mode: single
 
 ```
-Результат выполнения - сообщение в Телеграм 
+
+Результат выполнения - сообщение в Телеграм
 
 ![Автоматизация](images/telegram-2.png)
+
+При отправке оповещения в телеграм передается не временная ссылка на сгенерированный счет, а сам счет.
+
+Результат выполнения - уведомление в Home Assistant
+
+![Автоматизация](images/notify-2.png)
+
+**Внимание** ссылка для скачивания счета доступна несколько минут после генерации.
+Для сохранения счета можно воспользоваться интеграцией
+downloader (https://www.home-assistant.io/integrations/downloader/)
+
+Добавив к автоматизации еще один шаг скачивания счета.
+
+```yaml
+- service: downloader.download_file
+  data:
+    url: "{{trigger.event.data.url}}"
+    subdir: "bills"
+```
+
+### Уведомления об ошибках, возникших в процессе выполнения
+
+Уведомления об ошибках, возникших в процессе выполнения, в Телеграм и веб интерфейс Home Assistant.
+
+```yaml
+alias: Уведомление об ошибке при отправке показаний
+description: ""
+trigger:
+  - platform: event
+    event_type: tns_energo_send_readings_failed
+condition: [ ]
+action:
+  # уведомление в Телеграм
+  - service: telegram_bot.send_message
+    data:
+      authentication: digest
+      parse_mode: markdown
+      title: >-
+        Ошибка при передаче показаний для
+        {{device_attr(trigger.event.data.device_id, 'name_by_user') or 
+        device_attr(trigger.event.data.device_id, 'name') }}
+        от {{ now().strftime('%d-%m-%Y %H:%M')}}
+      message: "{{ trigger.event.data.error }}"
+  # уведомление в веб-интерфейсе  
+  - service: notify.persistent_notification
+    data:
+      title: >-
+        Ошибка при передаче показаний для
+        {{device_attr(trigger.event.data.device_id, 'name_by_user') or 
+        device_attr(trigger.event.data.device_id, 'name') }} 
+        от {{ now().strftime('%d-%m-%Y %H:%M')}}
+      message: "{{ trigger.event.data.error }}"
+
+mode: single
+```
+Используя приведенный выше шаблон вы можете создать оповещение для сервиса `tns_energo_get_bill_failed` 
 
 ## Возникли проблемы?
 

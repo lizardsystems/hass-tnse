@@ -20,7 +20,6 @@ from homeassistant.helpers.entity import EntityCategory, async_generate_entity_i
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
-
 from .const import (
     DOMAIN,
     CONF_INFO,
@@ -222,9 +221,9 @@ class TNSESensor(TNSEBaseCoordinatorEntity, SensorEntity):
     coordinator: TNSECoordinator
 
     def __init__(
-        self,
-        coordinator: TNSECoordinator,
-        entity_description: TNSESensorEntityDescription,
+            self,
+            coordinator: TNSECoordinator,
+            entity_description: TNSESensorEntityDescription,
     ) -> None:
         """Initialize the Sensor."""
         super().__init__(coordinator, entity_description)
@@ -241,9 +240,9 @@ class TNSESensor(TNSEBaseCoordinatorEntity, SensorEntity):
     def available(self) -> bool:
         """Return True if sensor is available."""
         return (
-            super().available
-            and self.coordinator.data is not None
-            and self.entity_description.avabl_fn(self._get_data())
+                super().available
+                and self.coordinator.data is not None
+                and self.entity_description.avabl_fn(self._get_data())
         )
 
     @callback
@@ -273,11 +272,11 @@ class TNSETariffSensor(TNSESensor):
     entity_description: TNSESensorEntityDescription
 
     def __init__(
-        self,
-        coordinator: TNSECoordinator,
-        entity_description: TNSESensorEntityDescription,
-        tarifnost: int,
-        tariff: int,
+            self,
+            coordinator: TNSECoordinator,
+            entity_description: TNSESensorEntityDescription,
+            tarifnost: int,
+            tariff: int,
     ) -> None:
         """Initialize the Sensor."""
         self.tarifnost = tarifnost
@@ -287,8 +286,8 @@ class TNSETariffSensor(TNSESensor):
     def _get_data(self) -> dict[str, Any] | None:
         """Get data for Sensor"""
         if (
-            CONF_READINGS in self.coordinator.data
-            and len(self.coordinator.data[CONF_READINGS]) >= self.tarifnost
+                CONF_READINGS in self.coordinator.data
+                and len(self.coordinator.data[CONF_READINGS]) >= self.tarifnost
         ):
             _data = self.coordinator.data[CONF_READINGS][self.tariff]
         else:
@@ -298,18 +297,18 @@ class TNSETariffSensor(TNSESensor):
 
 def _get_tarif_slug(tarifnost: int, nomer_tarifa: int, key: str) -> str:
     """Format tariff slug"""
-    return key if tarifnost == 1 else f"t{nomer_tarifa+1}_{key}"
+    return key if tarifnost == 1 else f"t{nomer_tarifa + 1}_{key}"
 
 
 def _get_tarif_name(tarifnost: int, nomer_tarifa: int, name: str) -> str:
     """Format tariff name"""
-    return name if tarifnost == 1 else f"T{nomer_tarifa+1} {name}"
+    return name if tarifnost == 1 else f"T{nomer_tarifa + 1} {name}"
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up a config entry."""
 

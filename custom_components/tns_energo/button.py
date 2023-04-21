@@ -10,11 +10,11 @@ from homeassistant.components.button import (
     ENTITY_ID_FORMAT,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import ATTR_DEVICE_ID
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory, async_generate_entity_id
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import slugify
-from homeassistant.const import ATTR_DEVICE_ID
 
 from .const import DOMAIN
 from .coordinator import TNSECoordinator
@@ -64,9 +64,9 @@ class TNSEButtonEntity(TNSEBaseCoordinatorEntity, ButtonEntity):
     entity_description: TNSEButtonEntityDescription
 
     def __init__(
-        self,
-        coordinator: TNSECoordinator,
-        entity_description: TNSEButtonEntityDescription,
+            self,
+            coordinator: TNSECoordinator,
+            entity_description: TNSEButtonEntityDescription,
     ) -> None:
         """Initialize the Entity"""
         super().__init__(coordinator, entity_description)
@@ -94,9 +94,9 @@ class TNSEButtonEntity(TNSEBaseCoordinatorEntity, ButtonEntity):
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up a config entry."""
 
