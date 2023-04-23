@@ -568,16 +568,20 @@ downloader (https://www.home-assistant.io/integrations/downloader/)
     subdir: "bills"
 ```
 
-### Уведомления об ошибках, возникших в процессе выполнения
+### Уведомления об ошибках, возникших в процессе выполнения сервиса
 
 Уведомления об ошибках, возникших в процессе выполнения, в Телеграм и веб интерфейс Home Assistant.
 
 ```yaml
-alias: Уведомление об ошибке при отправке показаний
+alias: Уведомление об ошибке при выполнения сервиса
 description: ""
 trigger:
   - platform: event
     event_type: tns_energo_send_readings_failed
+  - platform: event
+    event_type: tns_energo_get_bill_failed
+  - platform: event
+    event_type: tns_energo_refresh_failed
 condition: [ ]
 action:
   # уведомление в Телеграм
@@ -586,16 +590,32 @@ action:
       authentication: digest
       parse_mode: markdown
       title: >-
+        {% if trigger.event.event_type == 'tns_energo_send_readings_failed' %}
         Ошибка при передаче показаний для
+        {% elif trigger.event.event_type == 'tns_energo_get_bill_failed' %}
+        Ошибка при получении счета для
+        {% elif trigger.event.event_type == 'tns_energo_refresh_failed' %}
+        Ошибка при обновлении информации для
+        {% else %}
+        Ошибка при выполнении сервиса для
+        {% endif %}
         {{device_attr(trigger.event.data.device_id, 'name_by_user') or 
         device_attr(trigger.event.data.device_id, 'name') }}
         от {{ now().strftime('%d-%m-%Y %H:%M')}}
       message: "{{ trigger.event.data.error }}"
-  # уведомление в веб-интерфейсе  
+  # уведомление в веб-интерфейсе
   - service: notify.persistent_notification
     data:
       title: >-
+        {% if trigger.event.event_type == 'tns_energo_send_readings_failed' %}
         Ошибка при передаче показаний для
+        {% elif trigger.event.event_type == 'tns_energo_get_bill_failed' %}
+        Ошибка при получении счета для
+        {% elif trigger.event.event_type == 'tns_energo_refresh_failed' %}
+        Ошибка при обновлении информации для
+        {% else %}
+        Ошибка при выполнении сервиса для
+        {% endif %}
         {{device_attr(trigger.event.data.device_id, 'name_by_user') or 
         device_attr(trigger.event.data.device_id, 'name') }} 
         от {{ now().strftime('%d-%m-%Y %H:%M')}}
@@ -603,7 +623,7 @@ action:
 
 mode: single
 ```
-Используя приведенный выше шаблон вы можете создать оповещение для сервиса `tns_energo_get_bill_failed` 
+
 
 ## Возникли проблемы?
 
