@@ -20,13 +20,6 @@
       }
     }
   },
-  "device_automation": {
-    "action_type": {
-      "send_readings": "Send readings",
-      "get_bill": "Get bill",
-      "refresh": "Refresh information"
-    }
-  },
   "entity": {
     "sensor": {
       "account": {
@@ -81,6 +74,50 @@
       },
       "get_bill": {
         "name": "Get bill"
+      }
+    }
+  },
+  "services": {
+    "refresh": {
+      "name": "Update Information.",
+      "description": "Update personal account information of TNS-Energo",
+      "fields": {
+        "device_id": {
+          "name": "Account",
+          "description": "Select the account of TNS-Energo"
+        }
+      }
+    },
+    "get_bill": {
+      "name": "Get the bill.",
+      "description": "Receive an invoice from TNS-Energo",
+      "fields": {
+        "device_id": {
+          "name": "Account",
+          "description": "Select the account of TNS-Energo"
+        }
+      }
+    },
+    "send_readings": {
+      "name": "Send readings",
+      "description": "Send readings to TNS-Energo",
+      "fields": {
+        "device_id": {
+          "name": "Account",
+          "description": "Select the account of TNS-Energo"
+        },
+        "t1": {
+          "name": "Tariff reading T1, kWh",
+          "description": "Tariff reading T1, kWh"
+        },
+        "t2": {
+          "name": "Tariff reading T2, kWh",
+          "description": "Tariff reading T2, kWh"
+        },
+        "t3": {
+          "name": "Tariff reading T3, kWh",
+          "description": "Tariff reading T3, kWh"
+        }
       }
     }
   }

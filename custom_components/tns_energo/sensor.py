@@ -76,7 +76,7 @@ SENSOR_TYPES: tuple[TNSESensorEntityDescription, ...] = (
         value_fn=lambda data: _to_str(data.get(CONF_ACCOUNT)),
         avabl_fn=lambda data: CONF_ACCOUNT in data,
         translation_key="account",
-        entity_category=EntityCategory.CONFIG,
+        entity_category=EntityCategory.DIAGNOSTIC,
         attr_fn=lambda data: {
             # Информация о помещении
             "Адрес": _to_str(data[CONF_INFO].get("ADDRESS")),
@@ -165,7 +165,7 @@ SENSOR_TYPES: tuple[TNSESensorEntityDescription, ...] = (
         value_fn=lambda data: _to_str(data[CONF_READINGS][0].get("ZavodNomer")),
         avabl_fn=lambda data: CONF_READINGS in data,
         translation_key="meter",
-        entity_category=EntityCategory.CONFIG,
+        entity_category=EntityCategory.DIAGNOSTIC,
         attr_fn=lambda data: {
             # get the latest readings
             "Расчетный счет": _to_str(data[CONF_READINGS][0].get("RaschSch")),

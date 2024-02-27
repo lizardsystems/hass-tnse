@@ -10,7 +10,6 @@ from typing import TypeVar, ParamSpec, Concatenate, Any
 
 from aiotnse.exceptions import TNSEApiError, TNSEAuthError
 from aiotnse.helpers import is_error_response
-from async_timeout import timeout
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.json import json_dumps
 from homeassistant.helpers.update_coordinator import UpdateFailed
@@ -42,7 +41,7 @@ def async_api_request_handler(
             while True:
                 tries += 1
                 try:
-                    async with timeout(api_timeout):
+                    async with asyncio.timeout(api_timeout):
                         result = await method(self, *args, **kwargs)
                     if is_error_response(result):
                         self.logger.error(

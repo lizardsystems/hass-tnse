@@ -37,7 +37,7 @@ send_readings:
             integration: tns_energo
     t1:
       name: T1
-      description: Показания по тарифу T1, кВт⋅ч
+      description: Показания по тарифу T1, кВт*ч
       required: true
       selector:
         entity:
@@ -46,7 +46,7 @@ send_readings:
             device_class: energy
     t2:
       name: T2
-      description: Показания по тарифу T2, кВт⋅ч
+      description: Показания по тарифу T2, кВт*ч
       required: false
       selector:
         entity:
@@ -55,7 +55,7 @@ send_readings:
             device_class: energy
     t3:
       name: T3
-      description: Показания по тарифу T3, кВт⋅ч
+      description: Показания по тарифу T3, кВт*ч
       required: false
       selector:
         entity:

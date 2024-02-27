@@ -11,7 +11,6 @@ import voluptuous as vol
 from aiotnse import TNSEApi, SimpleTNSEAuth
 from aiotnse.exceptions import TNSEAuthError, TNSEApiError
 from aiotnse.helpers import is_error_response
-from async_timeout import timeout
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
@@ -47,7 +46,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         while True:
             tries += 1
             try:
-                async with timeout(api_timeout):
+                async with asyncio.timeout(api_timeout):
                     _data = await api.async_get_general_info(account)
                 if not is_error_response(_data):
                     break
