@@ -19,8 +19,7 @@
 
 [Настройки](https://my.home-assistant.io/redirect/config) &rarr; Устройства и службы
 &rarr; [Интеграции](https://my.home-assistant.io/redirect/integrations)
-&rarr; [Добавить интеграцию](https://my.home-assistant.io/redirect/config_flow_start?domain=tns_energo) &rarr; Поиск *
-*TNS-Energo**
+&rarr; [Добавить интеграцию](https://my.home-assistant.io/redirect/config_flow_start?domain=tns_energo) &rarr; Поиск &rarr; **TNS-Energo**
 
 или нажмите:
 
