@@ -1,0 +1,64 @@
+{
+  "entity": {
+    "sensor": {
+      "account": {
+        "default": "mdi:identifier"
+      },
+      "cost": {
+        "default": "mdi:cash"
+      },
+      "cost_date": {
+        "default": "mdi:calendar"
+      },
+      "balance": {
+        "default": "mdi:cash"
+      },
+      "meter": {
+        "default": "mdi:meter-electric-outline"
+      },
+      "readings_date": {
+        "default": "mdi:calendar"
+      },
+      "current_timestamp": {
+        "default": "mdi:update"
+      },
+      "readings_closed": {
+        "default": "mdi:lightning-bolt"
+      },
+      "readings_prev": {
+        "default": "mdi:lightning-bolt"
+      },
+      "t1_readings_closed": {
+        "default": "mdi:lightning-bolt"
+      },
+      "t1_readings_prev": {
+        "default": "mdi:lightning-bolt"
+      },
+      "t2_readings_closed": {
+        "default": "mdi:lightning-bolt"
+      },
+      "t2_readings_prev": {
+        "default": "mdi:lightning-bolt"
+      },
+      "t3_readings_closed": {
+        "default": "mdi:lightning-bolt"
+      },
+      "t3_readings_prev": {
+        "default": "mdi:lightning-bolt"
+      }
+    },
+    "button": {
+      "refresh": {
+        "default": "mdi:refresh"
+      },
+      "get_bill": {
+        "default": "mdi:receipt-text-outline"
+      }
+    }
+  }
+  "services": {
+    "refresh": "mdi:refresh",
+    "get_bill": "mdi:receipt-text-outline",
+    "send_readings": "mdi:receipt-text-send-outline"
+  }
+}
