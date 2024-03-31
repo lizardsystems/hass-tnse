@@ -1,22 +1,14 @@
 refresh:
-  name: Обновить информацию
-  description: Обновить информацию лицевого счета ТНС Энерго.
   fields:
     device_id:
-      name: Лицевой счет
-      description: Выберите лицевой счет ТНС Энерго
       required: true
       selector:
         device:
           filter:
             integration: tns_energo
 get_bill:
-  name: Получить счет
-  description: Получить счет от ТНС Энерго.
   fields:
     device_id:
-      name: Лицевой счет
-      description: Выберите лицевой счет ТНС Энерго
       required: true
       selector:
         device:
@@ -24,20 +16,14 @@ get_bill:
             integration: tns_energo
 
 send_readings:
-  name: Отправить показания
-  description: Отправить показания в ТНС Энерго.
   fields:
     device_id:
-      name: Лицевой счет
-      description: Выберите лицевой счет ТНС Энерго
       required: true
       selector:
         device:
           filter:
             integration: tns_energo
     t1:
-      name: T1
-      description: Показания по тарифу T1, кВт*ч
       required: true
       selector:
         entity:
@@ -45,8 +31,6 @@ send_readings:
             domain: sensor
             device_class: energy
     t2:
-      name: T2
-      description: Показания по тарифу T2, кВт*ч
       required: false
       selector:
         entity:
@@ -54,8 +38,6 @@ send_readings:
             domain: sensor
             device_class: energy
     t3:
-      name: T3
-      description: Показания по тарифу T3, кВт*ч
       required: false
       selector:
         entity:
