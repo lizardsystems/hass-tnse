@@ -42,14 +42,14 @@ from .entity import TNSEBaseCoordinatorEntity
 from .helpers import _to_str, _to_float, _to_int, _to_date, _to_year, _to_bool
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class TNSEEntityDescriptionMixin:
     """Mixin for required TNS-Energo base description keys."""
 
     value_fn: Callable[[dict[str, Any]], StateType | datetime | date]
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class TNSEBaseSensorEntityDescription(SensorEntityDescription):
     """Describes TNS-Energo sensor entity default overrides."""
 
@@ -60,7 +60,7 @@ class TNSEBaseSensorEntityDescription(SensorEntityDescription):
     icon_fn: Callable[[dict[str, Any]], str | None] = lambda _: None
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class TNSESensorEntityDescription(
     TNSEBaseSensorEntityDescription, TNSEEntityDescriptionMixin
 ):
