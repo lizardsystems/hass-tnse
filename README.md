@@ -6,8 +6,8 @@
 
 # Установка
 
-**Способ 1.** Через [HACS](https://hacs.xyz/) &rarr; Интеграции &rarr; Добавить пользовательский
-репозиторий &rarr; https://github.com/lizardsystems/hass-tnse/ &rarr; **TNS-Energo** &rarr; Установить
+**Способ 1.** [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=lizardsystems&repository=hass-tnse&category=integration)
+ &rarr; Установить
 
 **Способ 2.** Вручную скопируйте папку `tns_energo`
 из [latest release](https://github.com/lizardsystems/hass-tnse/releases/latest) в
