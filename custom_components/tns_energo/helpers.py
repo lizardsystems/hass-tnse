@@ -63,7 +63,7 @@ def get_float_value(hass: HomeAssistant, entity_id: str | None) -> float | None:
 
 
 def get_update_interval(hour: int, minute: int, second: int) -> timedelta:
-    """Get update interval to time"""
+    """Get an update interval to time"""
     now = dt.now()
     next_day = now + timedelta(days=1)
     next_time = next_day.replace(hour=hour, minute=minute, second=second)
@@ -77,7 +77,7 @@ def get_previous_month() -> date:
     today = date.today()
     first_day = (today - timedelta(days=today.day)).replace(
         day=1
-    )  # first day of previous month
+    )  # first day of the previous month
     return first_day
 
 

@@ -14,6 +14,10 @@ get_bill:
         device:
           filter:
             integration: tns_energo
+    date:
+      required: false
+      selector:
+        date:
 
 send_readings:
   fields:

@@ -95,6 +95,10 @@
         "device_id": {
           "name": "Account",
           "description": "Select the account of TNS-Energo"
+        },
+        "date": {
+          "name": "Date",
+          "description": "Date of the bill"
         }
       }
     },
