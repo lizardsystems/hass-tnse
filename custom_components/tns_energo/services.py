@@ -1,4 +1,5 @@
 """TNS-Energo services."""
+
 from __future__ import annotations
 
 import logging
@@ -21,7 +22,10 @@ from .const import (
     CONF_LINK,
     ATTR_T1,
     ATTR_T2,
-    ATTR_T3, ATTR_READINGS, ATTR_BALANCE, )
+    ATTR_T3,
+    ATTR_READINGS,
+    ATTR_BALANCE,
+)
 from .coordinator import TNSECoordinator
 from .helpers import (
     get_float_value,
@@ -53,6 +57,7 @@ SERVICE_SEND_READINGS_SCHEMA = vol.Schema(
 SERVICE_GET_BILL_SCHEMA = vol.Schema(
     {
         **SERVICE_BASE_SCHEMA,
+        vol.Optional(ATTR_DATE): cv.date,
     },
 )
 
@@ -69,17 +74,17 @@ class ServiceDescription:
 
 
 async def _async_handle_refresh(
-        hass: HomeAssistant, service_call: ServiceCall, coordinator: TNSECoordinator
+    hass: HomeAssistant, service_call: ServiceCall, coordinator: TNSECoordinator
 ) -> dict[str, Any]:
     await coordinator.async_refresh()
     return {}
 
 
 async def _async_handle_send_readings(
-        hass: HomeAssistant, service_call: ServiceCall, coordinator: TNSECoordinator
+    hass: HomeAssistant, service_call: ServiceCall, coordinator: TNSECoordinator
 ) -> dict[str, Any]:
     t_names = (ATTR_T1, ATTR_T2, ATTR_T3)
-    readings: dict[str, int] = dict()
+    readings: dict[str, int] = {}
 
     for t_name in t_names:
         t_value = get_float_value(hass, service_call.data.get(t_name))
@@ -97,7 +102,9 @@ async def _async_handle_send_readings(
 
     balance = result.get(CONF_DATA)
     if balance is None:
-        raise HomeAssistantError(f"{service_call.service}: Unrecognised response from API: {result}")
+        raise HomeAssistantError(
+            f"{service_call.service}: Unrecognised response from API: {result}"
+        )
 
     return {
         ATTR_READINGS: readings,
@@ -106,16 +113,18 @@ async def _async_handle_send_readings(
 
 
 async def _async_handle_get_bill(
-        hass: HomeAssistant, service_call: ServiceCall, coordinator: TNSECoordinator
+    hass: HomeAssistant, service_call: ServiceCall, coordinator: TNSECoordinator
 ) -> dict[str, Any]:
-    bill_date = get_previous_month()
+    bill_date = service_call.data.get(ATTR_DATE, get_previous_month())
     result = await coordinator.async_get_bill(bill_date)
     if result is None:
         raise HomeAssistantError(f"{service_call.service}: Empty response from API.")
 
     link = result.get(CONF_LINK)
     if link is None:
-        raise HomeAssistantError(f"{service_call.service}: Unrecognised response from API: {result}")
+        raise HomeAssistantError(
+            f"{service_call.service}: Unrecognised response from API: {result}"
+        )
 
     return {
         ATTR_DATE: bill_date,
@@ -129,7 +138,8 @@ SERVICES: dict[str, ServiceDescription] = {
     ),
     SERVICE_SEND_READINGS: ServiceDescription(
         SERVICE_SEND_READINGS, _async_handle_send_readings, SERVICE_SEND_READINGS_SCHEMA
-    ), SERVICE_GET_BILL: ServiceDescription(
+    ),
+    SERVICE_GET_BILL: ServiceDescription(
         SERVICE_GET_BILL, _async_handle_get_bill, SERVICE_GET_BILL_SCHEMA
     ),
 }
@@ -147,18 +157,19 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             device_id = service_call.data.get(ATTR_DEVICE_ID)
             coordinator = await async_get_coordinator(hass, device_id)
 
-            result = await SERVICES[service_call.service].service_func(hass, service_call, coordinator)
+            result = await SERVICES[service_call.service].service_func(
+                hass, service_call, coordinator
+            )
 
             hass.bus.async_fire(
                 event_type=f"{DOMAIN}_{service_call.service}_completed",
-                event_data={
-                    ATTR_DEVICE_ID: device_id,
-                    **result
-                },
+                event_data={ATTR_DEVICE_ID: device_id, **result},
                 context=service_call.context,
             )
 
-            _LOGGER.debug("Service call '%s' successfully finished", service_call.service)
+            _LOGGER.debug(
+                "Service call '%s' successfully finished", service_call.service
+            )
 
         except Exception as exc:
             _LOGGER.error(
