@@ -1,5 +1,6 @@
 {
     "name": "TNS-Energo Account integration",
     "render_readme": true,
-	"country": "RU"
+    "country": "RU",
+    "homeassistant": "2025.2.0"
 }

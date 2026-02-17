@@ -1,22 +1,21 @@
-"""Base entity for TNS-Energo integration"""
+"""Base entity for TNS-Energo integration."""
 from __future__ import annotations
 
-from aiotnse import TNSEApi
-from aiotnse.helpers import get_region
+import aiotnse
 from homeassistant.helpers.entity import DeviceInfo, EntityDescription
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.util import slugify
 
 from .const import (
-    DOMAIN,
     ATTRIBUTION,
     CONFIGURATION_URL,
-    CONF_READINGS,
-    MANUFACTURER,
+    COUNTER_MODEL,
+    COUNTER_NAME_FORMAT,
+    DEVICE_MODEL,
     DEVICE_NAME_FORMAT,
-    ATTR_MODEL_PU,
+    DOMAIN,
+    MANUFACTURER,
 )
-from .coordinator import TNSECoordinator
+from .coordinator import TNSEAccountData, TNSECoordinator
 
 
 class TNSEBaseCoordinatorEntity(CoordinatorEntity[TNSECoordinator]):
@@ -26,37 +25,66 @@ class TNSEBaseCoordinatorEntity(CoordinatorEntity[TNSECoordinator]):
     _attr_has_entity_name = True
 
     def __init__(
-            self, coordinator: TNSECoordinator, entity_description: EntityDescription
+        self,
+        coordinator: TNSECoordinator,
+        entity_description: EntityDescription,
+        account_number: str,
     ) -> None:
         """Initialize the Entity."""
         super().__init__(coordinator=coordinator)
         self.entity_description = entity_description
-
-        if (
-                CONF_READINGS in self.coordinator.data
-                and len(self.coordinator.data[CONF_READINGS]) > 0
-        ):
-            _model = self.coordinator.data[CONF_READINGS][0].get(ATTR_MODEL_PU)
-        else:
-            _model = None
+        self._account_number = account_number
 
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, coordinator.account)},
+            identifiers={(DOMAIN, account_number)},
             manufacturer=MANUFACTURER,
-            model=_model,
-            name=DEVICE_NAME_FORMAT.format(coordinator.account),
-            sw_version=TNSEApi.VERSION,
+            model=DEVICE_MODEL,
+            name=DEVICE_NAME_FORMAT.format(account_number),
+            sw_version=aiotnse.__version__,
             configuration_url=CONFIGURATION_URL.format(
-                region=get_region(coordinator.account)
+                region=coordinator.region
             ),
         )
 
-        self._attr_unique_id = slugify(
-            "_".join(
-                [
-                    DOMAIN,
-                    coordinator.account,
-                    self.entity_description.key,
-                ]
-            )
+        self._attr_unique_id = f"{account_number}_{entity_description.key}"
+
+    def _get_account(self) -> TNSEAccountData | None:
+        """Get current account data from coordinator."""
+        if self.coordinator.data is None:
+            return None
+        for acc in self.coordinator.data:
+            if acc.number == self._account_number:
+                return acc
+        return None
+
+
+class TNSECounterEntity(TNSEBaseCoordinatorEntity):
+    """TNS-Energo Counter Sub-Device Entity."""
+
+    def __init__(
+        self,
+        coordinator: TNSECoordinator,
+        entity_description: EntityDescription,
+        account_number: str,
+        counter_index: int,
+    ) -> None:
+        """Initialize the Entity."""
+        super().__init__(coordinator, entity_description, account_number)
+        self._counter_index = counter_index
+
+        counter_id = self._get_counter_id()
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, counter_id)},
+            name=COUNTER_NAME_FORMAT.format(counter_id),
+            manufacturer=MANUFACTURER,
+            model=COUNTER_MODEL,
+            via_device=(DOMAIN, account_number),
         )
+        self._attr_unique_id = f"{counter_id}_{entity_description.key}"
+
+    def _get_counter_id(self) -> str:
+        """Get counter ID from coordinator data."""
+        account = self._get_account()
+        if account is not None:
+            return account.get_counter_id(self._counter_index) or ""
+        return ""

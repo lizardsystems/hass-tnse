@@ -3,28 +3,50 @@
   "config": {
     "step": {
       "user": {
-        "title": "",
+        "title": "Учетная запись ТНС-Энерго",
         "data": {
-          "account": "Номер лицевого счета"
+          "email": "Email",
+          "password": "Пароль",
+          "region": "Регион"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Повторная аутентификация ТНС-Энерго",
+        "description": "Введите учетные данные для {email}",
+        "data": {
+          "password": "Пароль",
+          "region": "Регион"
+        }
+      },
+      "reconfigure": {
+        "title": "Перенастройка ТНС-Энерго",
+        "description": "Обновите настройки для {email}",
+        "data": {
+          "password": "Пароль",
+          "region": "Регион"
         }
       }
     },
     "error": {
       "cannot_connect": "Не удалось подключиться.",
       "invalid_auth": "Ошибка аутентификации.",
-      "unknown": "Непредвиденная ошибка.",
-      "no_devices": "В аккаунте не найдено ни одного устройства."
+      "unknown": "Непредвиденная ошибка."
     },
     "abort": {
-      "already_configured": "Этот аккаунт уже добавлено в Home Assistant.",
-      "reauth_successful": "Повторная аутентификация выполнена успешно."
+      "already_configured": "Эта учетная запись уже добавлена в Home Assistant.",
+      "cannot_connect": "Не удалось подключиться к сервису ТНС-Энерго: {error}",
+      "reauth_successful": "Повторная аутентификация выполнена успешно.",
+      "reconfigure_successful": "Перенастройка выполнена успешно.",
+      "wrong_account": "Учетная запись не соответствует существующей записи"
     }
   },
-  "device_automation": {
-    "action_type": {
-      "send_readings": "Отправить показания",
-      "get_bill": "Получить счет",
-      "refresh": "Обновить информацию"
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Интервал обновления (часы)"
+        }
+      }
     }
   },
   "entity": {
@@ -38,11 +60,11 @@
       "cost_date": {
         "name": "Дата начисления"
       },
-      "balance": {
+      "debt": {
         "name": "Задолженность"
       },
       "meter": {
-        "name": "Счетчик"
+        "name": "Номер счетчика"
       },
       "readings_date": {
         "name": "Дата передачи показаний"
@@ -50,29 +72,56 @@
       "current_timestamp": {
         "name": "Последнее обновление"
       },
-      "readings_closed": {
-        "name": "Закрытые показания"
+      "reading": {
+        "name": "Показания"
       },
-      "readings_prev": {
-        "name": "Предыдущие показания"
+      "t1_reading": {
+        "name": "Т1 Показания"
       },
-      "t1_readings_closed": {
-        "name": "Т1 Закрытые показания"
+      "t2_reading": {
+        "name": "Т2 Показания"
       },
-      "t1_readings_prev": {
-        "name": "Т1 Предыдущие показания"
+      "t3_reading": {
+        "name": "Т3 Показания"
       },
-      "t2_readings_closed": {
-        "name": "Т2 Закрытые показания"
+      "penalty": {
+        "name": "Пени"
       },
-      "t2_readings_prev": {
-        "name": "Т2 Предыдущие показания"
+      "advance_payment": {
+        "name": "Аванс"
       },
-      "t3_readings_closed": {
-        "name": "Т3 Закрытые показания"
+      "recalculation": {
+        "name": "Перерасчет"
       },
-      "t3_readings_prev": {
-        "name": "Т3 Предыдущие показания"
+      "common_needs": {
+        "name": "Общедомовые нужды"
+      },
+      "penalty_forecast": {
+        "name": "Прогноз пени"
+      },
+      "losses": {
+        "name": "Потери"
+      },
+      "other_services_debt": {
+        "name": "Задолженность по другим услугам"
+      },
+      "last_payment": {
+        "name": "Последний платеж"
+      },
+      "last_payment_date": {
+        "name": "Дата последнего платежа"
+      },
+      "consumption": {
+        "name": "Потребление"
+      },
+      "t1_consumption": {
+        "name": "Т1 Потребление"
+      },
+      "t2_consumption": {
+        "name": "Т2 Потребление"
+      },
+      "t3_consumption": {
+        "name": "Т3 Потребление"
       }
     },
     "button": {
@@ -82,6 +131,20 @@
       "get_bill": {
         "name": "Получить счет"
       }
+    }
+  },
+  "exceptions": {
+    "tariff_missing": {
+      "message": "Не указан обязательный тариф {tariff} для \"{account}\". Счетчик имеет {need} тарифных зон(ы)"
+    },
+    "tariff_extra": {
+      "message": "Лишний тариф {tariff} для \"{account}\". Счетчик имеет только {need} тарифных зон(ы)"
+    },
+    "no_file_in_response": {
+      "message": "В ответе для лицевого счета {account} отсутствует файл"
+    },
+    "service_failed": {
+      "message": "Ошибка при вызове действия {service}: {error}"
     }
   },
   "services": {

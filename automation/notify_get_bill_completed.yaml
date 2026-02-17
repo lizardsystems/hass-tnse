@@ -1,35 +1,27 @@
 alias: Уведомление о счете за электроэнергию
 description: ""
-trigger:
-  - platform: event
+triggers:
+  - trigger: event
     event_type: tns_energo_get_bill_completed
-condition: [ ]
-action:
-  # уведомление в Телеграм
-  - service: telegram_bot.send_document
+conditions: []
+actions:
+  # отправка PDF в Telegram
+  - action: telegram_bot.send_document
     data:
-      authentication: digest
-      parse_mode: markdown
-      url: >-
-        {{trigger.event.data.url}}
+      file: "{{ trigger.event.data.file_path }}"
       caption: >-
-        Счет за электроэнергию для
-        {{device_attr(trigger.event.data.device_id, 'name_by_user') or 
-        device_attr(trigger.event.data.device_id, 'name') }}
-        за {{trigger.event.data.date}}
-  # уведомление в веб-интерфейсе
-  - service: notify.persistent_notification
+        ⚡Счет за электроэнергию для
+        {{device_attr(trigger.event.data.device_id, 'name_by_user') or
+        device_attr(trigger.event.data.device_id, 'name')}}
+        за {{ trigger.event.data.date }}
+  # уведомление в веб-интерфейсе со ссылкой на скачивание
+  - action: persistent_notification.create
     data:
-      message: >-
-        Скачать счет для 
-        [{{device_attr(trigger.event.data.device_id, 'name_by_user') or 
-        device_attr(trigger.event.data.device_id, 'name') }}]({{trigger.event.data.url}})
-        за {{trigger.event.data.date}}.
-
       title: >-
-        Счет за электроэнергию для
-        {{device_attr(trigger.event.data.device_id, 'name_by_user') or 
-        device_attr(trigger.event.data.device_id, 'name') }}
-        за {{trigger.event.data.date}}
-
+        ⚡Счет за электроэнергию для
+        {{device_attr(trigger.event.data.device_id, 'name_by_user') or
+        device_attr(trigger.event.data.device_id, 'name')}}
+        за {{ trigger.event.data.date }}
+      message: >-
+        <a href="{{ trigger.event.data.url }}" target="_blank">Скачать счет</a>
 mode: single

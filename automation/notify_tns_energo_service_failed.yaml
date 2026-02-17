@@ -1,20 +1,19 @@
-alias: Уведомление об ошибке при выполнения сервиса
+alias: Уведомление об ошибке ТНС-Энерго
 description: ""
-trigger:
-  - platform: event
+triggers:
+  - trigger: event
     event_type: tns_energo_send_readings_failed
-  - platform: event
+  - trigger: event
     event_type: tns_energo_get_bill_failed
-  - platform: event
+  - trigger: event
     event_type: tns_energo_refresh_failed
-
-condition: [ ]
-action:
-  # уведомление в Телеграм
-  - service: telegram_bot.send_message
+conditions: []
+actions:
+  # уведомление в Telegram
+  - action: notify.send_message
+    target:
+      entity_id: <YOUR_NOTIFY_ENTITY>
     data:
-      authentication: digest
-      parse_mode: markdown
       title: >-
         {% if trigger.event.event_type == 'tns_energo_send_readings_failed' %}
         Ошибка при передаче показаний для
@@ -23,14 +22,14 @@ action:
         {% elif trigger.event.event_type == 'tns_energo_refresh_failed' %}
         Ошибка при обновлении информации для
         {% else %}
-        Ошибка при выполнении сервиса для
+        Ошибка при выполнении действия для
         {% endif %}
-        {{device_attr(trigger.event.data.device_id, 'name_by_user') or 
-        device_attr(trigger.event.data.device_id, 'name') }}
-        от {{ now().strftime('%d-%m-%Y %H:%M')}}
+        {{device_attr(trigger.event.data.device_id, 'name_by_user') or
+        device_attr(trigger.event.data.device_id, 'name')}}
+        от {{ now().strftime('%d.%m.%Y %H:%M')}}
       message: "{{ trigger.event.data.error }}"
   # уведомление в веб-интерфейсе
-  - service: notify.persistent_notification
+  - action: persistent_notification.create
     data:
       title: >-
         {% if trigger.event.event_type == 'tns_energo_send_readings_failed' %}
@@ -40,11 +39,10 @@ action:
         {% elif trigger.event.event_type == 'tns_energo_refresh_failed' %}
         Ошибка при обновлении информации для
         {% else %}
-        Ошибка при выполнении сервиса для
+        Ошибка при выполнении действия для
         {% endif %}
-        {{device_attr(trigger.event.data.device_id, 'name_by_user') or 
-        device_attr(trigger.event.data.device_id, 'name') }} 
-        от {{ now().strftime('%d-%m-%Y %H:%M')}}
+        {{device_attr(trigger.event.data.device_id, 'name_by_user') or
+        device_attr(trigger.event.data.device_id, 'name')}}
+        от {{ now().strftime('%d.%m.%Y %H:%M')}}
       message: "{{ trigger.event.data.error }}"
-
 mode: single

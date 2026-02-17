@@ -3,379 +3,450 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, date
-from typing import Any
+from datetime import date, datetime
+from typing import Any, Final
 
 from homeassistant.components.sensor import (
+    SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
-    SensorDeviceClass,
     SensorStateClass,
-    ENTITY_ID_FORMAT,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfEnergy
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import EntityCategory, async_generate_entity_id
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
-from .const import (
-    DOMAIN,
-    CONF_INFO,
-    CONF_PAYMENT,
-    CONF_READINGS,
-    CONF_ACCOUNT,
-    FORMAT_DATE_SHORT_YEAR,
-    FORMAT_DATE_FULL_YEAR,
-    ATTR_DATE_POK,
-    ATTR_ZAKR_POK,
-    ATTR_PRED_POK,
-    ATTR_LABEL,
-    ATTR_NAZVANIE_TARIFA,
-    ATTR_NOMER_TARIFA,
-    ATTR_TARIFNOST,
-    ATTR_LAST_UPDATE_TIME,
-)
-from .coordinator import TNSECoordinator
-from .entity import TNSEBaseCoordinatorEntity
-from .helpers import _to_str, _to_float, _to_int, _to_date, _to_year, _to_bool
+from . import TNSEConfigEntry
+from .const import FORMAT_DATE_SHORT_YEAR
+from .coordinator import TNSEAccountData, TNSECoordinator
+from .entity import TNSEBaseCoordinatorEntity, TNSECounterEntity
+from .helpers import to_date, to_float, to_str
+
+PARALLEL_UPDATES: Final = 1
+
+
+# ---------------------------------------------------------------------------
+# Account-level sensor descriptions
+# ---------------------------------------------------------------------------
 
 
 @dataclass(frozen=True, kw_only=True)
-class TNSEEntityDescriptionMixin:
-    """Mixin for required TNS-Energo base description keys."""
+class TNSESensorEntityDescription(SensorEntityDescription):
+    """Describes TNS-Energo account-level sensor entity."""
 
-    value_fn: Callable[[dict[str, Any]], StateType | datetime | date]
-
-
-@dataclass(frozen=True, kw_only=True)
-class TNSEBaseSensorEntityDescription(SensorEntityDescription):
-    """Describes TNS-Energo sensor entity default overrides."""
-
-    attr_fn: Callable[
-        [dict[str, Any]], dict[str, StateType | datetime | date]
-    ] = lambda _: {}
-    avabl_fn: Callable[[dict[str, Any]], bool] = lambda _: True
-    icon_fn: Callable[[dict[str, Any]], str | None] = lambda _: None
+    value_fn: Callable[[TNSEAccountData, TNSECoordinator], StateType | datetime | date]
+    attr_fn: Callable[[TNSEAccountData], dict[str, Any]] = lambda account: {}
+    available_fn: Callable[[TNSEAccountData], bool] = lambda account: True
 
 
-@dataclass(frozen=True, kw_only=True)
-class TNSESensorEntityDescription(
-    TNSEBaseSensorEntityDescription, TNSEEntityDescriptionMixin
-):
-    """Describes TNS-Energo sensor entity."""
-
-
-SENSOR_TYPES: tuple[TNSESensorEntityDescription, ...] = (
-    # Информация по счету
+ACCOUNT_SENSOR_TYPES: tuple[TNSESensorEntityDescription, ...] = (
     TNSESensorEntityDescription(
         key="account",
-        name="Лицевой счет",
-        icon="mdi:identifier",
-        value_fn=lambda data: _to_str(data.get(CONF_ACCOUNT)),
-        avabl_fn=lambda data: CONF_ACCOUNT in data,
+        value_fn=lambda account, coordinator: account.number,
         translation_key="account",
         entity_category=EntityCategory.DIAGNOSTIC,
-        attr_fn=lambda data: {
-            # Информация о помещении
-            "Адрес": _to_str(data[CONF_INFO].get("ADDRESS")),
-            "Телефон": _to_str(data[CONF_INFO].get("TELNANIMATEL")),
-            "Количество прописанных лиц": _to_int(
-                data[CONF_INFO].get("CHISLOPROPISAN")
-            ),
-            "Общая площадь": _to_float(data[CONF_INFO].get("OBSCHPLOSCHAD")),
-            "Жилая площадь": _to_float(data[CONF_INFO].get("JILPLOSCHAD")),
-            "Документ на собственность": _to_str(data[CONF_INFO].get("DOCSOBSTV")),
-            # Информация о счетчике
-            "Место установки счетчика": _to_str(
-                data[CONF_INFO]["counters"][0].get("MestoUst")
-            ),
-            "Заводской номер счетчика": _to_str(
-                data[CONF_INFO]["counters"][0].get("ZavodNomer")
-            ),
-            # Информация о тарифе
-            "Категория жильцов": _to_str(data[CONF_INFO].get("KATEGJIL")),
-            "Коэффициент сезонности": _to_float(data[CONF_INFO].get("SN_KOEFSEZON")),
-            "Общий объем социальной нормы": _to_float(data[CONF_INFO].get("SN_OBJEM")),
-            # Доставка квитанций
-            "Квитанция в электронном виде": _to_bool(
-                data[CONF_INFO].get("DIGITAL_RECEIPT")
-            ),
+        attr_fn=lambda account: {
+            "Адрес": to_str(account.info.get("address")),
+            "Телефон": to_str(account.info.get("phone")),
+            "Количество прописанных лиц": account.info.get("numberPersons"),
+            "Общая площадь": account.info.get("totalArea"),
+            "Жилая площадь": account.info.get("livingArea"),
+            "Документ на собственность": to_str(account.info.get("document")),
+            "Категория жильцов": to_str(account.info.get("tenantCategory")),
+            "Коэффициент сезонности": account.info.get("seasonRatio"),
+            "Доступность ИСУЭ": account.isue_available,
+            "Начальный год": account.initial_year,
         },
     ),
     TNSESensorEntityDescription(
         key="cost",
-        name="Сумма к оплате",
         native_unit_of_measurement="RUB",
         device_class=SensorDeviceClass.MONETARY,
-        value_fn=lambda data: _to_float(data[CONF_PAYMENT].get("СУММАКОПЛАТЕ")),
-        avabl_fn=lambda data: CONF_PAYMENT in data,
+        value_fn=lambda account, coordinator: account.sum_to_pay,
+        available_fn=lambda account: account.has_balance,
         translation_key="cost",
-        attr_fn=lambda data: {
-            # get current payment
-            "Входящее сальдо": _to_float(data[CONF_PAYMENT].get("ВХСАЛЬДО")),
-            "Задолженность": _to_float(data[CONF_PAYMENT].get("ЗАДОЛЖЕННОСТЬ")),
-            "Задолженность откл": _to_float(
-                data[CONF_PAYMENT].get("ЗАДОЛЖЕННОСТЬОТКЛ")
-            ),
-            "Задолженность пени": _to_float(
-                data[CONF_PAYMENT].get("ЗАДОЛЖЕННОСТЬПЕНИ")
-            ),
-            "Задолженность подкл": _to_float(
-                data[CONF_PAYMENT].get("ЗАДОЛЖЕННОСТЬПОДКЛ")
-            ),
-            "Закрытый месяц": _to_date(
-                data[CONF_PAYMENT].get("ЗАКРЫТЫЙМЕСЯЦ"), FORMAT_DATE_SHORT_YEAR
-            ),  # "01.03.23"
-            "Начислено по ИПУ": _to_float(data[CONF_PAYMENT].get("НАЧИСЛЕНОПОИПУ")),
-            "Перерасчет": _to_float(data[CONF_PAYMENT].get("ПЕРЕРАСЧЕТ")),
-            "Прогноз по ИПУ": _to_float(data[CONF_PAYMENT].get("ПРОГНОЗПОИПУ")),
-            "Сумма потери": _to_float(data[CONF_PAYMENT].get("СУМАПОТЕРИ")),
-            "Сумма к оплате": _to_float(data[CONF_PAYMENT].get("СУММАКОПЛАТЕ")),
-            "Сумма одн прогноз": _to_float(data[CONF_PAYMENT].get("СУММАОДНПРОГНОЗ")),
-            "Сумма пени прогноз": _to_float(data[CONF_PAYMENT].get("СУММАПЕНИПРОГНОЗ")),
-            "Сумма платежей": _to_float(data[CONF_PAYMENT].get("СУММАПЛАТЕЖЕЙ")),
-            "Ф Начислено по ИПУ": _to_float(data[CONF_PAYMENT].get("ФНАЧИСЛЕНОПОИПУ")),
+        attr_fn=lambda account: {
+            "Сумма без округления": account.balance.get("sumToPayRaw"),
+            "Сумма без доп. начислений": account.balance.get("sumWithoutCheckbox"),
+            "Сумма с доп. начислениями": account.balance.get("sumWithCheckbox"),
         },
     ),
     TNSESensorEntityDescription(
         key="cost_date",
-        name="Дата начисления",
         device_class=SensorDeviceClass.DATE,
-        value_fn=lambda data: _to_date(
-            data[CONF_PAYMENT].get("ЗАКРЫТЫЙМЕСЯЦ"), FORMAT_DATE_SHORT_YEAR
+        value_fn=lambda account, coordinator: to_date(
+            account.closed_month, FORMAT_DATE_SHORT_YEAR
         ),
-        avabl_fn=lambda data: CONF_PAYMENT in data,
+        available_fn=lambda account: account.has_balance,
         translation_key="cost_date",
     ),
     TNSESensorEntityDescription(
-        key="balance",
-        name="Задолженность",
+        key="debt",
         device_class=SensorDeviceClass.MONETARY,
         native_unit_of_measurement="RUB",
-        value_fn=lambda data: _to_float(data[CONF_PAYMENT].get("ЗАДОЛЖЕННОСТЬ")),
-        avabl_fn=lambda data: CONF_PAYMENT in data,
-        translation_key="balance",
-    ),
-    TNSESensorEntityDescription(
-        key="meter",
-        name="Счетчик",
-        icon="mdi:meter-electric-outline",
-        value_fn=lambda data: _to_str(data[CONF_READINGS][0].get("ZavodNomer")),
-        avabl_fn=lambda data: CONF_READINGS in data,
-        translation_key="meter",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        attr_fn=lambda data: {
-            # get the latest readings
-            "Расчетный счет": _to_str(data[CONF_READINGS][0].get("RaschSch")),
-            "Модель": _to_str(data[CONF_READINGS][0].get("ModelPU")),
-            "Тарифность счётчика": _to_int(data[CONF_READINGS][0].get("Tarifnost")),
-            "Разрядность": _to_int(data[CONF_READINGS][0].get("Razradnost")),
-            "Коэффициент трансформации": _to_float(
-                data[CONF_READINGS][0].get("KoefTrans")
-            ),
-            "Тип": _to_int(data[CONF_READINGS][0].get("Type")),
-            "Максимальные показания": _to_float(data[CONF_READINGS][0].get("MaxPok")),
-            "Место установки": _to_str(data[CONF_READINGS][0].get("MestoUst")),
-            "Год выпуска": _to_year(
-                data[CONF_READINGS][0].get("GodVipuska"), FORMAT_DATE_SHORT_YEAR
-            ),  # "01.01.22"
-            "Дата поверки": _to_date(
-                data[CONF_READINGS][0].get("DatePover"), FORMAT_DATE_FULL_YEAR
-            ),  # "01.03.2023"
-            "Дата последней поверки": _to_date(
-                data[CONF_READINGS][0].get("DatePosledPover"), FORMAT_DATE_FULL_YEAR
-            ),  # "01.03.2023"
-            "Статус даты поверки": _to_str(
-                data[CONF_READINGS][0].get("DatePoverStatus")
-            ),
+        value_fn=lambda account, coordinator: account.debt,
+        available_fn=lambda account: account.has_balance,
+        translation_key="debt",
+        attr_fn=lambda account: {
+            "Абсолютная задолженность": account.balance.get("debtAbs"),
         },
     ),
     TNSESensorEntityDescription(
-        key="readings_date",
-        name="Дата передачи показаний",
-        device_class=SensorDeviceClass.DATE,
-        value_fn=lambda data: _to_date(
-            data[CONF_READINGS][0].get(ATTR_DATE_POK), FORMAT_DATE_FULL_YEAR
-        ),  # "01.03.2023"
-        avabl_fn=lambda data: CONF_READINGS in data,
-        translation_key="readings_date",
-    ),
-    TNSESensorEntityDescription(
         key="current_timestamp",
-        name="Последнее обновление",
         device_class=SensorDeviceClass.TIMESTAMP,
-        value_fn=lambda data: data[ATTR_LAST_UPDATE_TIME],
-        avabl_fn=lambda data: ATTR_LAST_UPDATE_TIME in data,
+        value_fn=lambda account, coordinator: coordinator.last_update_time,
         entity_category=EntityCategory.DIAGNOSTIC,
         translation_key="current_timestamp",
+    ),
+    TNSESensorEntityDescription(
+        key="penalty",
+        native_unit_of_measurement="RUB",
+        device_class=SensorDeviceClass.MONETARY,
+        value_fn=lambda account, coordinator: account.balance.get("peniDebt"),
+        available_fn=lambda account: account.has_balance,
+        translation_key="penalty",
+    ),
+    TNSESensorEntityDescription(
+        key="advance_payment",
+        native_unit_of_measurement="RUB",
+        device_class=SensorDeviceClass.MONETARY,
+        value_fn=lambda account, coordinator: account.balance.get("avansTotal"),
+        available_fn=lambda account: account.has_balance,
+        translation_key="advance_payment",
+        attr_fn=lambda account: {
+            "Тип аванса": to_str(account.balance.get("avansType")),
+            "Основной аванс": account.balance.get("avansMain"),
+        },
+    ),
+    TNSESensorEntityDescription(
+        key="recalculation",
+        native_unit_of_measurement="RUB",
+        device_class=SensorDeviceClass.MONETARY,
+        value_fn=lambda account, coordinator: account.balance.get("recalc"),
+        available_fn=lambda account: account.has_balance,
+        translation_key="recalculation",
+    ),
+    TNSESensorEntityDescription(
+        key="common_needs",
+        native_unit_of_measurement="RUB",
+        device_class=SensorDeviceClass.MONETARY,
+        value_fn=lambda account, coordinator: account.balance.get("odn"),
+        available_fn=lambda account: account.has_balance,
+        translation_key="common_needs",
+    ),
+    TNSESensorEntityDescription(
+        key="penalty_forecast",
+        native_unit_of_measurement="RUB",
+        device_class=SensorDeviceClass.MONETARY,
+        value_fn=lambda account, coordinator: account.balance.get("peniForecast"),
+        available_fn=lambda account: account.has_balance,
+        translation_key="penalty_forecast",
+    ),
+    TNSESensorEntityDescription(
+        key="losses",
+        native_unit_of_measurement="RUB",
+        device_class=SensorDeviceClass.MONETARY,
+        value_fn=lambda account, coordinator: account.balance.get("losses"),
+        available_fn=lambda account: account.has_balance,
+        translation_key="losses",
+    ),
+    TNSESensorEntityDescription(
+        key="other_services_debt",
+        native_unit_of_measurement="RUB",
+        device_class=SensorDeviceClass.MONETARY,
+        value_fn=lambda account, coordinator: account.balance.get("otherServicesDebt"),
+        available_fn=lambda account: account.has_balance,
+        translation_key="other_services_debt",
+    ),
+    TNSESensorEntityDescription(
+        key="last_payment",
+        native_unit_of_measurement="RUB",
+        device_class=SensorDeviceClass.MONETARY,
+        value_fn=lambda account, coordinator: account.last_payment_amount,
+        available_fn=lambda account: account.has_last_payment,
+        translation_key="last_payment",
+    ),
+    TNSESensorEntityDescription(
+        key="last_payment_date",
+        device_class=SensorDeviceClass.DATE,
+        value_fn=lambda account, coordinator: to_date(
+            account.last_payment_date, FORMAT_DATE_SHORT_YEAR
+        ),
+        available_fn=lambda account: account.has_last_payment,
+        translation_key="last_payment_date",
     ),
 )
 
 
+# ---------------------------------------------------------------------------
+# Counter-level sensor descriptions
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, kw_only=True)
+class TNSECounterSensorEntityDescription(SensorEntityDescription):
+    """Describes TNS-Energo counter-level sensor entity."""
+
+    value_fn: Callable[
+        [TNSEAccountData, int, TNSECoordinator], StateType | datetime | date
+    ]
+    attr_fn: Callable[[TNSEAccountData, int], dict[str, Any]] = (
+        lambda account, counter_index: {}
+    )
+    available_fn: Callable[[TNSEAccountData, int], bool] = (
+        lambda account, counter_index: True
+    )
+
+
+COUNTER_SENSOR_TYPES: tuple[TNSECounterSensorEntityDescription, ...] = (
+    TNSECounterSensorEntityDescription(
+        key="readings_date",
+        device_class=SensorDeviceClass.DATE,
+        value_fn=lambda account, counter_index, coordinator: to_date(
+            r["date"]
+            if (r := account.get_counter_reading(counter_index, 0))
+            else None,
+            FORMAT_DATE_SHORT_YEAR,
+        ),
+        available_fn=lambda account, counter_index: bool(
+            account.get_counter_readings(counter_index)
+        ),
+        translation_key="readings_date",
+    ),
+    TNSECounterSensorEntityDescription(
+        key="meter",
+        value_fn=lambda account, counter_index, coordinator: account.get_counter_id(
+            counter_index
+        ),
+        available_fn=lambda account, counter_index: (
+            account.get_counter(counter_index) is not None
+        ),
+        translation_key="meter",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        attr_fn=lambda account, counter_index: {
+            "Тип установки": to_str(ct.get("installationType")),
+            "Место установки": account.get_counter_place(counter_index),
+            "Тарифность": ct.get("tariff"),
+            "Дата поверки": ct.get("checkingDate"),
+        }
+        if (ct := account.get_counter(counter_index))
+        else {},
+    ),
+
+)
+
+
+# ---------------------------------------------------------------------------
+# Counter tariff reading helpers
+# ---------------------------------------------------------------------------
+
+
+def _counter_tariff_value(
+    account: TNSEAccountData, counter_index: int, reading_index: int
+) -> float | None:
+    """Return the tariff reading value."""
+    reading = account.get_counter_reading(counter_index, reading_index)
+    return to_float(reading.get("value")) if reading else None
+
+
+def _counter_tariff_available(
+    account: TNSEAccountData, counter_index: int, reading_index: int
+) -> bool:
+    """Return True if the tariff reading exists."""
+    return account.get_counter_reading(counter_index, reading_index) is not None
+
+
+def _counter_tariff_attributes(
+    account: TNSEAccountData, counter_index: int, reading_index: int
+) -> dict[str, Any]:
+    """Return extra state attributes for a tariff reading."""
+    reading = account.get_counter_reading(counter_index, reading_index)
+    if not reading:
+        return {}
+    return {
+        "Название тарифа": reading.get("name"),
+        "Дата показаний": reading.get("date"),
+    }
+
+
+def _counter_consumption_value(
+    account: TNSEAccountData, counter_index: int, reading_index: int
+) -> float | None:
+    """Return consumption value for a counter tariff."""
+    return account.get_counter_consumption(counter_index, reading_index)
+
+
+def _counter_consumption_available(
+    account: TNSEAccountData, counter_index: int, reading_index: int
+) -> bool:
+    """Return True if consumption data exists for a counter tariff."""
+    return account.get_counter_consumption(counter_index, reading_index) is not None
+
+
+# ---------------------------------------------------------------------------
+# Sensor entity classes
+# ---------------------------------------------------------------------------
+
+
 class TNSESensor(TNSEBaseCoordinatorEntity, SensorEntity):
-    """TNS-Energo Sensor."""
+    """TNS-Energo Account-Level Sensor."""
 
     entity_description: TNSESensorEntityDescription
-    coordinator: TNSECoordinator
-
-    def __init__(
-            self,
-            coordinator: TNSECoordinator,
-            entity_description: TNSESensorEntityDescription,
-    ) -> None:
-        """Initialize the Sensor."""
-        super().__init__(coordinator, entity_description)
-
-        self.entity_id = async_generate_entity_id(
-            ENTITY_ID_FORMAT, self._attr_unique_id, hass=coordinator.hass
-        )
-
-    def _get_data(self) -> dict[str, Any]:
-        """Get data for Sensor"""
-        return self.coordinator.data
 
     @property
     def available(self) -> bool:
         """Return True if sensor is available."""
-        return (
-                super().available
-                and self.coordinator.data is not None
-                and self.entity_description.avabl_fn(self._get_data())
+        account = self._get_account()
+        if account is None:
+            return False
+        return super().available and self.entity_description.available_fn(account)
+
+    @property
+    def native_value(self) -> StateType | datetime | date:
+        """Return the state of the sensor."""
+        account = self._get_account()
+        if account is None:
+            return None
+        return self.entity_description.value_fn(account, self.coordinator)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the state attributes."""
+        account = self._get_account()
+        if account is None:
+            return {}
+        return self.entity_description.attr_fn(account)
+
+
+class TNSECounterSensor(TNSECounterEntity, SensorEntity):
+    """TNS-Energo Counter Sub-Device Sensor."""
+
+    entity_description: TNSECounterSensorEntityDescription
+
+    @property
+    def available(self) -> bool:
+        """Return True if sensor is available."""
+        account = self._get_account()
+        if account is None:
+            return False
+        return super().available and self.entity_description.available_fn(
+            account, self._counter_index
         )
 
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        self._attr_native_value = self.entity_description.value_fn(self._get_data())
-
-        self._attr_extra_state_attributes = self.entity_description.attr_fn(
-            self._get_data()
+    @property
+    def native_value(self) -> StateType | datetime | date:
+        """Return the state of the sensor."""
+        account = self._get_account()
+        if account is None:
+            return None
+        return self.entity_description.value_fn(
+            account, self._counter_index, self.coordinator
         )
 
-        if self.entity_description.icon_fn is not None:
-            self._attr_icon = self.entity_description.icon_fn(self._get_data())
-
-        self.coordinator.logger.debug(
-            "Entity ID: %s Value: %s", self.entity_id, self.native_value
-        )
-
-        self.async_write_ha_state()
-
-
-class TNSETariffSensor(TNSESensor):
-    """TNS-Energo Sensor."""
-
-    tarifnost: int
-    tariff: int
-    entity_description: TNSESensorEntityDescription
-
-    def __init__(
-            self,
-            coordinator: TNSECoordinator,
-            entity_description: TNSESensorEntityDescription,
-            tarifnost: int,
-            tariff: int,
-    ) -> None:
-        """Initialize the Sensor."""
-        self.tarifnost = tarifnost
-        self.tariff = tariff
-        super().__init__(coordinator=coordinator, entity_description=entity_description)
-
-    def _get_data(self) -> dict[str, Any] | None:
-        """Get data for Sensor"""
-        if (
-                CONF_READINGS in self.coordinator.data
-                and len(self.coordinator.data[CONF_READINGS]) >= self.tarifnost
-        ):
-            _data = self.coordinator.data[CONF_READINGS][self.tariff]
-        else:
-            _data = None
-        return _data
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the state attributes."""
+        account = self._get_account()
+        if account is None:
+            return {}
+        return self.entity_description.attr_fn(account, self._counter_index)
 
 
-def _get_tarif_slug(tarifnost: int, nomer_tarifa: int, key: str) -> str:
-    """Format tariff slug"""
-    return key if tarifnost == 1 else f"t{nomer_tarifa + 1}_{key}"
+class TNSECounterTariffSensor(TNSECounterSensor):
+    """TNS-Energo Counter Tariff Reading Sensor."""
 
 
-def _get_tarif_name(tarifnost: int, nomer_tarifa: int, name: str) -> str:
-    """Format tariff name"""
-    return name if tarifnost == 1 else f"T{nomer_tarifa + 1} {name}"
+# ---------------------------------------------------------------------------
+# Platform setup
+# ---------------------------------------------------------------------------
+
+
+def _get_tariff_key(tariff_count: int, index: int, key: str) -> str:
+    """Format tariff key."""
+    return key if tariff_count == 1 else f"t{index + 1}_{key}"
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    entry: TNSEConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up a config entry."""
+    """Set up sensor entities."""
+    coordinator = entry.runtime_data
 
-    coordinator: TNSECoordinator = hass.data[DOMAIN][entry.entry_id]
+    entities: list[SensorEntity] = []
 
-    entities: list[TNSESensor] = [
-        TNSESensor(coordinator, entity_description)
-        for entity_description in SENSOR_TYPES
-    ]
+    for account in coordinator.data:
+        # Account-level sensors
+        for description in ACCOUNT_SENSOR_TYPES:
+            entities.append(TNSESensor(coordinator, description, account.number))
 
-    if CONF_READINGS in coordinator.data:
-        tarifnost = int(coordinator.data[CONF_READINGS][0][ATTR_TARIFNOST])
-        for tariff in coordinator.data[CONF_READINGS]:
-            nomer_tarifa = int(tariff[ATTR_NOMER_TARIFA])
-
-            entities.append(
-                TNSETariffSensor(
-                    coordinator,
-                    TNSESensorEntityDescription(
-                        key=_get_tarif_slug(tarifnost, nomer_tarifa, "readings_closed"),
-                        name=_get_tarif_name(
-                            tarifnost, nomer_tarifa, "Закрытые показания"
-                        ),
-                        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-                        device_class=SensorDeviceClass.ENERGY,
-                        state_class=SensorStateClass.TOTAL,
-                        value_fn=lambda data: _to_float(data.get(ATTR_ZAKR_POK)),
-                        avabl_fn=lambda data: len(data) > 0,
-                        translation_key=_get_tarif_slug(
-                            tarifnost, nomer_tarifa, "readings_closed"
-                        ),
-                        attr_fn=lambda data: {
-                            "Название тарифа": _to_str(data.get(ATTR_NAZVANIE_TARIFA)),
-                            "Номер тарифа": _to_int(data.get(ATTR_NOMER_TARIFA)),
-                            "Название": _to_str(data.get(ATTR_LABEL)),
-                        },
-                    ),
-                    tarifnost,
-                    nomer_tarifa,
+        # Counter sub-device sensors
+        for j, counter in enumerate(account.counters):
+            # Static counter sensors (meter, readings_date)
+            for description in COUNTER_SENSOR_TYPES:
+                entities.append(
+                    TNSECounterSensor(
+                        coordinator, description, account.number, j
+                    )
                 )
-            )
 
-            entities.append(
-                TNSETariffSensor(
-                    coordinator,
-                    TNSESensorEntityDescription(
-                        key=_get_tarif_slug(tarifnost, nomer_tarifa, "readings_prev"),
-                        name=_get_tarif_name(
-                            tarifnost, nomer_tarifa, "Предыдущие показания"
+            # Per-tariff reading sensors
+            last_readings = counter.get("lastReadings", [])
+            tariff_count = len(last_readings)
+
+            for i in range(tariff_count):
+                reading_key = _get_tariff_key(tariff_count, i, "reading")
+
+                entities.append(
+                    TNSECounterTariffSensor(
+                        coordinator,
+                        TNSECounterSensorEntityDescription(
+                            key=reading_key,
+                            native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+                            device_class=SensorDeviceClass.ENERGY,
+                            state_class=SensorStateClass.TOTAL,
+                            value_fn=lambda account, counter_index, coordinator, reading_idx=i: _counter_tariff_value(
+                                account, counter_index, reading_idx
+                            ),
+                            available_fn=lambda account, counter_index, reading_idx=i: _counter_tariff_available(
+                                account, counter_index, reading_idx
+                            ),
+                            translation_key=reading_key,
+                            attr_fn=lambda account, counter_index, reading_idx=i: _counter_tariff_attributes(
+                                account, counter_index, reading_idx
+                            ),
                         ),
-                        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-                        device_class=SensorDeviceClass.ENERGY,
-                        state_class=SensorStateClass.TOTAL,
-                        value_fn=lambda data: _to_float(data.get(ATTR_PRED_POK)),
-                        avabl_fn=lambda data: len(data) > 0,
-                        translation_key=_get_tarif_slug(
-                            tarifnost, nomer_tarifa, "readings_prev"
-                        ),
-                        attr_fn=lambda data: {
-                            "Название тарифа": _to_str(data.get(ATTR_NAZVANIE_TARIFA)),
-                            "Номер тарифа": _to_int(data.get(ATTR_NOMER_TARIFA)),
-                            "Название": _to_str(data.get(ATTR_LABEL)),
-                        },
-                    ),
-                    tarifnost,
-                    nomer_tarifa,
+                        account.number,
+                        j,
+                    )
                 )
-            )
+
+                # Per-tariff consumption sensors
+                consumption_key = _get_tariff_key(
+                    tariff_count, i, "consumption"
+                )
+
+                entities.append(
+                    TNSECounterTariffSensor(
+                        coordinator,
+                        TNSECounterSensorEntityDescription(
+                            key=consumption_key,
+                            native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+                            device_class=SensorDeviceClass.ENERGY,
+                            value_fn=lambda account, counter_index, coordinator, reading_idx=i: _counter_consumption_value(
+                                account, counter_index, reading_idx
+                            ),
+                            available_fn=lambda account, counter_index, reading_idx=i: _counter_consumption_available(
+                                account, counter_index, reading_idx
+                            ),
+                            translation_key=consumption_key,
+                        ),
+                        account.number,
+                        j,
+                    )
+                )
 
     async_add_entities(entities, True)

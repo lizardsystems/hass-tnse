@@ -6,18 +6,6 @@ refresh:
         device:
           filter:
             integration: tns_energo
-get_bill:
-  fields:
-    device_id:
-      required: true
-      selector:
-        device:
-          filter:
-            integration: tns_energo
-    date:
-      required: false
-      selector:
-        date:
 
 send_readings:
   fields:
@@ -27,6 +15,7 @@ send_readings:
         device:
           filter:
             integration: tns_energo
+            model: Электросчетчик
     t1:
       required: true
       selector:
@@ -48,3 +37,17 @@ send_readings:
           filter:
             domain: sensor
             device_class: energy
+
+get_bill:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          filter:
+            integration: tns_energo
+            model: Лицевой счет
+    date:
+      required: false
+      selector:
+        date:

@@ -1,13 +1,13 @@
-alias: Запросить счета за электроэнергию
+alias: Запросить счет за электроэнергию
 description: ""
-trigger:
-  - platform: time
+triggers:
+  - trigger: time
     at: "01:00:00"
-condition:
+conditions:
   - condition: template
     value_template: "{{ now().day == 5 }}"
-action:
-  - service: tns_energo.get_bill
+actions:
+  - action: tns_energo.get_bill
     data:
       device_id: <YOUR_DEVICE_ID>
 mode: single

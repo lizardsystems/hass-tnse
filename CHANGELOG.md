@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Адаптация под aiotnse 2.0.3: API-методы теперь возвращают payload напрямую вместо обёртки `{"result", "statusCode", "data"}`
+- `async_check_version()` стала standalone-функцией (не требует авторизации)
+- Обновлена зависимость `aiotnse==2.0.3`
+
+### Fixed
+
+- Исправлено извлечение платежей из истории — `history_resp.get("items", [])` вместо `history_resp.get("data", [])`
+
+## [2.0.0] - 2026-02-11
+
+### Breaking Changes
+
+- Полностью переработан для нового мобильного API ТНС-Энерго
+- Авторизация по email/пароль вместо номера лицевого счета
+- Требуется выбор региона при настройке
+- Изменен набор сенсоров и их атрибутов
+- Требуется Python 3.13+ и aiotnse 2.0.0
+
+### Added
+
+- Авторизация по email и паролю с выбором региона
+- Поддержка нескольких счетчиков на лицевом счете — для каждого счетчика создается дочернее устройство (sub-device), привязанное к лицевому счету через `via_device`
+- Поток переавторизации (reauth flow)
+- Поток перенастройки (reconfigure flow)
+- Поток настройки параметров (options flow) с интервалом обновления
+- Кнопки «Обновить» и «Получить счет»
+- Автоматическое сохранение счета (PDF) в `/config/www/tns_energo/`
+- Диагностика (diagnostics) с автоматическим скрытием конфиденциальных данных
+- Автоматическое удаление устаревших устройств и счетчиков (stale device cleanup)
+- Переводы исключений (exception translations)
+- Сенсоры, отключенные по умолчанию (entity-disabled-by-default)
+- Иконки для всех сенсоров и сервисов (icons.json)
+- Переводы сенсоров (entity translations)
+- Файл strings.json
+- Полный набор тестов
+
+### Changed
+
+- Обновлена библиотека aiotnse до версии 2.0.0
+- Обновлена документация README.md для v2.0.0
+
+### Improved
+
+- Добавлены аксессоры в `TNSEAccountData` для удобного доступа к полям данных
+- Упрощены лямбда-выражения в `sensor.py` — извлечены именованные функции для тарифных сенсоров
+- Переименовано `avabl_fn` → `available_fn` в описаниях сенсоров
+- Переименованы приватные хелперы `_to_str`, `_to_float`, `_to_int`, `_to_date` → `to_str`, `to_float`, `to_int`, `to_date`
+- Извлечен общий метод `_async_try_validate` в config flow для устранения дублирования
+- Используются аксессоры вместо прямого доступа к dict в `services.py`
+- Упрощена очистка устаревших устройств в `__init__.py` с использованием `any()`
+- Добавлены предупреждения в лог при отсутствии `registry_entry` или `device_id` в `button.py`
+- Удалены неиспользуемые константы из `const.py`
+
 ## [1.5.0] - 2025-04-23
 
 ### Added

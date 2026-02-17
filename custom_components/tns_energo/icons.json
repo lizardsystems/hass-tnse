@@ -10,7 +10,7 @@
       "cost_date": {
         "default": "mdi:calendar"
       },
-      "balance": {
+      "debt": {
         "default": "mdi:cash"
       },
       "meter": {
@@ -22,28 +22,55 @@
       "current_timestamp": {
         "default": "mdi:update"
       },
-      "readings_closed": {
+      "reading": {
         "default": "mdi:lightning-bolt"
       },
-      "readings_prev": {
+      "t1_reading": {
         "default": "mdi:lightning-bolt"
       },
-      "t1_readings_closed": {
+      "t2_reading": {
         "default": "mdi:lightning-bolt"
       },
-      "t1_readings_prev": {
+      "t3_reading": {
         "default": "mdi:lightning-bolt"
       },
-      "t2_readings_closed": {
+      "penalty": {
+        "default": "mdi:cash"
+      },
+      "advance_payment": {
+        "default": "mdi:cash"
+      },
+      "recalculation": {
+        "default": "mdi:cash"
+      },
+      "common_needs": {
+        "default": "mdi:cash"
+      },
+      "penalty_forecast": {
+        "default": "mdi:cash"
+      },
+      "losses": {
+        "default": "mdi:cash"
+      },
+      "other_services_debt": {
+        "default": "mdi:cash"
+      },
+      "last_payment": {
+        "default": "mdi:cash-clock"
+      },
+      "last_payment_date": {
+        "default": "mdi:cash-clock"
+      },
+      "consumption": {
         "default": "mdi:lightning-bolt"
       },
-      "t2_readings_prev": {
+      "t1_consumption": {
         "default": "mdi:lightning-bolt"
       },
-      "t3_readings_closed": {
+      "t2_consumption": {
         "default": "mdi:lightning-bolt"
       },
-      "t3_readings_prev": {
+      "t3_consumption": {
         "default": "mdi:lightning-bolt"
       }
     },
