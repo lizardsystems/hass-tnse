@@ -8,5 +8,5 @@
     "issue_tracker": "https://github.com/lizardsystems/hass-tnse/issues",
     "loggers": ["aiotnse", "tns_energo"],
     "requirements": ["aiotnse==2.0.3"],
-    "version": "2.0.1"
+    "version": "2.0.0"
 }
