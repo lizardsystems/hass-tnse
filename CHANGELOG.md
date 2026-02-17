@@ -5,19 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Changed
-
-- Адаптация под aiotnse 2.0.3: API-методы теперь возвращают payload напрямую вместо обёртки `{"result", "statusCode", "data"}`
-- `async_check_version()` стала standalone-функцией (не требует авторизации)
-- Обновлена зависимость `aiotnse==2.0.3`
-
-### Fixed
-
-- Исправлено извлечение платежей из истории — `history_resp.get("items", [])` вместо `history_resp.get("data", [])`
-
-## [2.0.0] - 2026-02-11
+## [2.0.0] - 2026-02-17
 
 ### Breaking Changes
 
@@ -25,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Авторизация по email/пароль вместо номера лицевого счета
 - Требуется выбор региона при настройке
 - Изменен набор сенсоров и их атрибутов
-- Требуется Python 3.13+ и aiotnse 2.0.0
+- Требуется Python 3.13+ и aiotnse 2.0.3
 
 ### Added
 
@@ -43,12 +31,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Иконки для всех сенсоров и сервисов (icons.json)
 - Переводы сенсоров (entity translations)
 - Файл strings.json
-- Полный набор тестов
+- Модель устройства для фильтрации в сервисах (`Лицевой счет`, `Электросчетчик`)
+- Полный набор из 135 тестов
 
 ### Changed
 
-- Обновлена библиотека aiotnse до версии 2.0.0
-- Обновлена документация README.md для v2.0.0
+- Обновлена библиотека aiotnse до версии 2.0.3
+- Обновлена документация README.md со скриншотами и примерами автоматизаций
+
+### Fixed
+
+- Исправлена латинская C → кириллическая С в имени устройства `DEVICE_NAME_FORMAT`
+- Исправлен `date.today()` → `dt_util.now().date()` для корректной работы с часовыми поясами
+- Исправлен формат даты последнего платежа (короткий год `%d.%m.%y`)
+- Исправлено извлечение платежей из истории — `history_resp.get("items", [])` вместо `history_resp.get("data", [])`
+- Исправлена ссылка на скачивание счёта в уведомлениях (HTML вместо markdown)
 
 ### Improved
 
