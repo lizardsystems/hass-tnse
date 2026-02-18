@@ -41,5 +41,8 @@ test = [
     "aiotnse==2.0.3",
 ]
 
+[tool.setuptools.packages.find]
+include = ["custom_components*"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
