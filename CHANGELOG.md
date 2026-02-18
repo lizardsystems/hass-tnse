@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
- - Фильтрация устройств в `send_readings` по `entity.device_class: energy` вместо `model: Электросчетчик`.
  - Действие `get_bill` принимает любое устройство интеграции (убран фильтр `model: Лицевой счет`).
  - Анонимизированы примеры device_id в документации.
 
