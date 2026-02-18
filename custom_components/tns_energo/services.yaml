@@ -14,9 +14,8 @@ send_readings:
       selector:
         device:
           filter:
-            - integration: tns_energo
-              entity:
-                - device_class: energy
+            integration: tns_energo
+            model: Электросчетчик
     t1:
       required: true
       selector:
