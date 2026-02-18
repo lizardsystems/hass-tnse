@@ -349,6 +349,7 @@ async def test_reauth_flow_success(
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
+            CONF_EMAIL: MOCK_EMAIL,
             CONF_PASSWORD: "new_password",
             CONF_REGION: MOCK_REGION,
         },
@@ -356,7 +357,9 @@ async def test_reauth_flow_success(
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reauth_successful"
+    assert mock_config_entry.data[CONF_EMAIL] == MOCK_EMAIL
     assert mock_config_entry.data[CONF_PASSWORD] == "new_password"
+    assert mock_config_entry.unique_id == MOCK_EMAIL
 
 
 async def test_reauth_flow_invalid_auth(
@@ -373,6 +376,7 @@ async def test_reauth_flow_invalid_auth(
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
+            CONF_EMAIL: MOCK_EMAIL,
             CONF_PASSWORD: "wrong",
             CONF_REGION: MOCK_REGION,
         },
@@ -396,6 +400,7 @@ async def test_reauth_flow_cannot_connect(
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
+            CONF_EMAIL: MOCK_EMAIL,
             CONF_PASSWORD: MOCK_PASSWORD,
             CONF_REGION: MOCK_REGION,
         },
@@ -419,6 +424,7 @@ async def test_reauth_flow_unknown_error(
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
+            CONF_EMAIL: MOCK_EMAIL,
             CONF_PASSWORD: MOCK_PASSWORD,
             CONF_REGION: MOCK_REGION,
         },
@@ -441,6 +447,7 @@ async def test_reauth_flow_change_region(
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
+            CONF_EMAIL: MOCK_EMAIL,
             CONF_PASSWORD: "new_password",
             CONF_REGION: "voronezh",
         },
@@ -450,6 +457,43 @@ async def test_reauth_flow_change_region(
     assert result["reason"] == "reauth_successful"
     assert mock_config_entry.data[CONF_PASSWORD] == "new_password"
     assert mock_config_entry.data[CONF_REGION] == "voronezh"
+
+
+async def test_reauth_flow_migrated_v1_entry(
+    hass: HomeAssistant,
+    mock_regions: AsyncMock,
+    mock_validate: AsyncMock,
+) -> None:
+    """Test reauth for an entry migrated from v1 (unique_id is account number, not email)."""
+    migrated_entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id="231106045525",
+        data={
+            "account": "231106045525",
+            CONF_EMAIL: "",
+            CONF_REGION: MOCK_REGION,
+        },
+        version=2,
+    )
+    migrated_entry.add_to_hass(hass)
+
+    result = await migrated_entry.start_reauth_flow(hass)
+    assert result["type"] is FlowResultType.FORM
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {
+            CONF_EMAIL: MOCK_EMAIL,
+            CONF_PASSWORD: "new_password",
+            CONF_REGION: MOCK_REGION,
+        },
+    )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reauth_successful"
+    assert migrated_entry.data[CONF_EMAIL] == MOCK_EMAIL
+    assert migrated_entry.data[CONF_PASSWORD] == "new_password"
+    assert migrated_entry.unique_id == MOCK_EMAIL
 
 
 # ---------------------------------------------------------------------------

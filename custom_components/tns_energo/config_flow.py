@@ -200,20 +200,18 @@ class TNSEConfigFlow(ConfigFlow, domain=DOMAIN):
             )
 
         if user_input is not None:
-            email = reauth_entry.data[CONF_EMAIL]
+            email = user_input[CONF_EMAIL].strip().lower()
             password = user_input[CONF_PASSWORD]
             region = user_input.get(CONF_REGION, reauth_entry.data.get(CONF_REGION))
 
             if token_data := await self._async_try_validate(
                 email, password, region, errors, context="reauth"
             ):
-                await self.async_set_unique_id(
-                    reauth_entry.data[CONF_EMAIL].lower()
-                )
-                self._abort_if_unique_id_mismatch(reason="wrong_account")
                 return self.async_update_reload_and_abort(
                     reauth_entry,
+                    unique_id=email,
                     data_updates={
+                        CONF_EMAIL: email,
                         CONF_PASSWORD: password,
                         CONF_REGION: region,
                         **token_data,
@@ -224,6 +222,10 @@ class TNSEConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="reauth_confirm",
             data_schema=vol.Schema(
                 {
+                    vol.Required(
+                        CONF_EMAIL,
+                        default=reauth_entry.data.get(CONF_EMAIL, ""),
+                    ): str,
                     vol.Required(CONF_PASSWORD): str,
                     vol.Required(
                         CONF_REGION,
@@ -231,9 +233,6 @@ class TNSEConfigFlow(ConfigFlow, domain=DOMAIN):
                     ): vol.In(regions),
                 }
             ),
-            description_placeholders={
-                CONF_EMAIL: reauth_entry.data.get(CONF_EMAIL, ""),
-            },
             errors=errors,
         )
 
@@ -253,9 +252,7 @@ class TNSEConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             email = reconfigure_entry.data[CONF_EMAIL]
-            password = user_input.get(
-                CONF_PASSWORD, reconfigure_entry.data[CONF_PASSWORD]
-            )
+            password = user_input[CONF_PASSWORD]
             region = user_input.get(
                 CONF_REGION, reconfigure_entry.data[CONF_REGION]
             )

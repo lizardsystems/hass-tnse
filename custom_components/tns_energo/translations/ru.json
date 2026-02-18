@@ -12,8 +12,8 @@
       },
       "reauth_confirm": {
         "title": "Повторная аутентификация ТНС-Энерго",
-        "description": "Введите учетные данные для {email}",
         "data": {
+          "email": "Email",
           "password": "Пароль",
           "region": "Регион"
         }

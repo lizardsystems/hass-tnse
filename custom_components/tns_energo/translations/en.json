@@ -24,8 +24,8 @@
       },
       "reauth_confirm": {
         "title": "Re-authenticate TNS-Energo",
-        "description": "Re-enter credentials for {email}",
         "data": {
+          "email": "Email",
           "password": "Password",
           "region": "Region"
         }
