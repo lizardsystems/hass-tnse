@@ -200,12 +200,12 @@
 Обновляет все данные лицевого счета через API.
 
 Параметры:
-- **device_id** — устройство (лицевой счет)
+- **device_id** — устройство (лицевой счет или счетчик)
 
 ```yaml
 action: tns_energo.refresh
 data:
-  device_id: c535106f017be8b830d448abd526a977
+  device_id: <YOUR_DEVICE_ID>
 ```
 
 ### tns_energo.send_readings — Отправить показания
@@ -234,13 +234,13 @@ data:
 Запрашивает счет об оказанных услугах и сохраняет PDF в `/config/www/tns_energo/`.
 
 Параметры:
-- **device_id** — устройство (лицевой счет)
+- **device_id** — устройство (лицевой счет или счетчик)
 - **date** — дата (месяц) для получения счета (необязательный, по умолчанию — прошлый месяц)
 
 ```yaml
 action: tns_energo.get_bill
 data:
-  device_id: c535106f017be8b830d448abd526a977
+  device_id: <YOUR_DEVICE_ID>
 ```
 
 С указанием даты:
@@ -248,7 +248,7 @@ data:
 ```yaml
 action: tns_energo.get_bill
 data:
-  device_id: c535106f017be8b830d448abd526a977
+  device_id: <YOUR_DEVICE_ID>
   date: "2026-01-01"
 ```
 
@@ -296,8 +296,8 @@ data:
 Через минуту после отправки обновляются данные лицевого счета.
 
 > **Примечание:** В `device_id` для `send_readings` указывается устройство **счетчика**
-> (например, «Счетчик №10000001»), а для `refresh` — устройство **лицевого счета**
-> (например, «ЛС №611000000000»).
+> (например, «Счетчик №10000001»). Для `refresh` и `get_bill` можно указать любое устройство
+> интеграции (лицевой счет или счетчик).
 
 ```yaml
 alias: Отправить показания по электроэнергии
@@ -311,7 +311,7 @@ conditions:
 actions:
   - action: tns_energo.send_readings
     data:
-      device_id: 0c783f4eaaf44085fe302973c54dd4d4  # ID устройства счетчика
+      device_id: <YOUR_DEVICE_ID>  # ID устройства счетчика
       t1: sensor.neva_mt_114_wi_fi_22222222_energy_t1_a
       t2: sensor.neva_mt_114_wi_fi_22222222_energy_t2_a
     alias: "ТНС-Энерго: Отправить показания (Дом)"
@@ -322,7 +322,7 @@ actions:
       milliseconds: 0
   - action: tns_energo.refresh
     data:
-      device_id: c535106f017be8b830d448abd526a977  # ID устройства лицевого счета
+      device_id: <YOUR_DEVICE_ID>  # ID устройства лицевого счета
 mode: single
 ```
 
@@ -345,7 +345,7 @@ conditions:
 actions:
   - action: tns_energo.get_bill
     data:
-      device_id: c535106f017be8b830d448abd526a977
+      device_id: <YOUR_DEVICE_ID>
 mode: single
 ```
 
@@ -556,7 +556,7 @@ mode: single
 sequence:
   - action: tns_energo.get_bill
     data:
-      device_id: c535106f017be8b830d448abd526a977
+      device_id: <YOUR_DEVICE_ID>
       date: "{{ states('input_datetime.tns_energo_bill_date') }}"
 ```
 
@@ -601,7 +601,7 @@ cards:
 sequence:
   - action: tns_energo.get_bill
     data:
-      device_id: c535106f017be8b830d448abd526a977
+      device_id: <YOUR_DEVICE_ID>
       date: "{{ now().date() }}"
 ```
 

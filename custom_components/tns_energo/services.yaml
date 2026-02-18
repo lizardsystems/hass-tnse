@@ -14,8 +14,9 @@ send_readings:
       selector:
         device:
           filter:
-            integration: tns_energo
-            model: Электросчетчик
+            - integration: tns_energo
+              entity:
+                - device_class: energy
     t1:
       required: true
       selector:
@@ -46,7 +47,6 @@ get_bill:
         device:
           filter:
             integration: tns_energo
-            model: Лицевой счет
     date:
       required: false
       selector:
