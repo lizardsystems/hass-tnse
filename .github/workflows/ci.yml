@@ -22,7 +22,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install dependencies
-        run: pip install -e ".[test]"
+        run: pip install pytest pytest-asyncio pytest-homeassistant-custom-component aiotnse==2.0.3
 
       - name: Run tests
         run: pytest tests/ -v
