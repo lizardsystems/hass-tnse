@@ -237,7 +237,19 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                     "error": str(exc),
                 },
             ) from exc
-        except HomeAssistantError:
+        except HomeAssistantError as exc:
+            _LOGGER.error(
+                "Service call '%s' failed. Error: %s", service_call.service, exc
+            )
+
+            hass.bus.async_fire(
+                event_type=f"{DOMAIN}_{service_call.service}_failed",
+                event_data={
+                    ATTR_DEVICE_ID: service_call.data.get(ATTR_DEVICE_ID),
+                    "error": str(exc),
+                },
+                context=service_call.context,
+            )
             raise
         except Exception as exc:
             _LOGGER.error(

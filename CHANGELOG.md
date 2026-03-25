@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3] - 2026-03-25
+
+### Fixed
+
+ - Исправлен баг: при ошибках сервисов типа `HomeAssistantError` (например, «файл не найден в ответе API») событие `_failed` не генерировалось. Теперь все ошибки корректно стреляют событие `tns_energo_*_failed`.
+ - Исправлен баг: сенсоры потребления T1/T2 могли показывать перепутанные значения на двухтарифных счётчиках. Теперь потребление сопоставляется по названию тарифа, а не по позиции в массиве (#12).
+
 ## [2.0.2] - 2026-02-18
 
 ### Fixed

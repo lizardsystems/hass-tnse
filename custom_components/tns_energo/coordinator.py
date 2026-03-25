@@ -106,16 +106,27 @@ class TNSEAccountData:
         counter_id = self.get_counter_id(counter_index)
         if counter_id is None:
             return None
-        readings = self.counter_consumption.get(counter_id, [])
-        if reading_index >= len(readings):
+        reading = self.get_counter_reading(counter_index, reading_index)
+        if reading is None:
             return None
-        consumption = readings[reading_index].get("consumption")
-        if consumption is None:
+        reading_name = reading.get("name")
+        if not reading_name:
             return None
-        try:
-            return float(consumption)
-        except (TypeError, ValueError):
-            return None
+        for entry in self.counter_consumption.get(counter_id, []):
+            entry_name = entry.get("name") or ""
+            entry_title = entry.get("title") or ""
+            if (
+                entry_name == reading_name
+                or entry_title.startswith(reading_name + " ")
+            ):
+                consumption = entry.get("consumption")
+                if consumption is None:
+                    return None
+                try:
+                    return float(consumption)
+                except (TypeError, ValueError):
+                    return None
+        return None
 
     @property
     def sum_to_pay(self) -> float | None:

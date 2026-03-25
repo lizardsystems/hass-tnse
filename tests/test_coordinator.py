@@ -445,8 +445,37 @@ class TestCounterConsumption:
             counters=MOCK_COUNTERS_RESPONSE,
             counter_consumption={
                 "10000001": [
-                    {"consumption": "120"},
-                    {"consumption": "60"},
+                    {"title": "День ПУ 10000001", "consumption": "120"},
+                    {"title": "Ночь ПУ 10000001", "consumption": "60"},
+                ]
+            },
+        )
+        assert account.get_counter_consumption(0, 0) == 120.0
+        assert account.get_counter_consumption(0, 1) == 60.0
+
+    def test_consumption_reversed_order(self) -> None:
+        """Test consumption matched by name even when order differs."""
+        account = _make_account(
+            counters=MOCK_COUNTERS_RESPONSE,
+            counter_consumption={
+                "10000001": [
+                    {"title": "Ночь ПУ 10000001", "consumption": "60"},
+                    {"title": "День ПУ 10000001", "consumption": "120"},
+                ]
+            },
+        )
+        # reading 0 = "День", reading 1 = "Ночь"
+        assert account.get_counter_consumption(0, 0) == 120.0
+        assert account.get_counter_consumption(0, 1) == 60.0
+
+    def test_consumption_match_by_name_field(self) -> None:
+        """Test consumption matched via 'name' field (not 'title')."""
+        account = _make_account(
+            counters=MOCK_COUNTERS_RESPONSE,
+            counter_consumption={
+                "10000001": [
+                    {"name": "Ночь", "consumption": "60"},
+                    {"name": "День", "consumption": "120"},
                 ]
             },
         )
@@ -461,7 +490,7 @@ class TestCounterConsumption:
         account = _make_account(
             counters=MOCK_COUNTERS_RESPONSE,
             counter_consumption={
-                "10000001": [{"consumption": "120"}]
+                "10000001": [{"title": "День ПУ 10000001", "consumption": "120"}]
             },
         )
         assert account.get_counter_consumption(0, 5) is None
@@ -474,7 +503,7 @@ class TestCounterConsumption:
         account = _make_account(
             counters=MOCK_COUNTERS_RESPONSE,
             counter_consumption={
-                "10000001": [{"consumption": None}]
+                "10000001": [{"title": "День ПУ 10000001", "consumption": None}]
             },
         )
         assert account.get_counter_consumption(0, 0) is None
@@ -484,7 +513,19 @@ class TestCounterConsumption:
         account = _make_account(
             counters=MOCK_COUNTERS_RESPONSE,
             counter_consumption={
-                "10000001": [{"consumption": "abc"}]
+                "10000001": [{"title": "День ПУ 10000001", "consumption": "abc"}]
+            },
+        )
+        assert account.get_counter_consumption(0, 0) is None
+
+    def test_consumption_no_name_match(self) -> None:
+        """Test consumption returns None when no title/name matches."""
+        account = _make_account(
+            counters=MOCK_COUNTERS_RESPONSE,
+            counter_consumption={
+                "10000001": [
+                    {"title": "Пик ПУ 10000001", "consumption": "100"},
+                ]
             },
         )
         assert account.get_counter_consumption(0, 0) is None

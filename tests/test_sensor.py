@@ -10,6 +10,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.tns_energo.const import DOMAIN
 
 from .const import (
+    MOCK_COUNTER_READINGS_REVERSED_RESPONSE,
     MOCK_COUNTER_READINGS_SINGLE_TARIFF_RESPONSE,
     MOCK_COUNTERS_MULTI,
     MOCK_COUNTERS_SINGLE_TARIFF,
@@ -580,6 +581,34 @@ async def test_sensor_consumption_values(
     assert t1 is not None
     assert float(t1.state) == 120.0
 
+    t2_entity_id = _get_entity_id(hass, "10000001_t2_consumption")
+    t2 = hass.states.get(t2_entity_id)
+    assert t2 is not None
+    assert float(t2.state) == 60.0
+
+
+async def test_sensor_consumption_reversed_order(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_auth: AsyncMock,
+    mock_api: AsyncMock,
+) -> None:
+    """Test consumption matches by tariff name when API returns reversed order."""
+    mock_api.async_get_counter_readings.return_value = (
+        MOCK_COUNTER_READINGS_REVERSED_RESPONSE
+    )
+    mock_config_entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    # T1 = "День" reading, should get "День" consumption = 120
+    t1_entity_id = _get_entity_id(hass, "10000001_t1_consumption")
+    t1 = hass.states.get(t1_entity_id)
+    assert t1 is not None
+    assert float(t1.state) == 120.0
+
+    # T2 = "Ночь" reading, should get "Ночь" consumption = 60
     t2_entity_id = _get_entity_id(hass, "10000001_t2_consumption")
     t2 = hass.states.get(t2_entity_id)
     assert t2 is not None

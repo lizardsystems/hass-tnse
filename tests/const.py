@@ -141,8 +141,17 @@ MOCK_INVOICE_FILE_RESPONSE = {"file": "dGVzdCBwZGYgZGF0YQ=="}
 MOCK_COUNTER_READINGS_RESPONSE = [
     {
         "readings": [
-            {"name": "День", "value": "3500", "date": "24.01.26", "consumption": "120"},
-            {"name": "Ночь", "value": "1500", "date": "24.01.26", "consumption": "60"},
+            {"title": "День ПУ 10000001", "value": 5100, "consumption": 120},
+            {"title": "Ночь ПУ 10000001", "value": 2200, "consumption": 60},
+        ]
+    }
+]
+
+MOCK_COUNTER_READINGS_REVERSED_RESPONSE = [
+    {
+        "readings": [
+            {"title": "Ночь ПУ 10000001", "value": 2200, "consumption": 60},
+            {"title": "День ПУ 10000001", "value": 5100, "consumption": 120},
         ]
     }
 ]
@@ -150,7 +159,7 @@ MOCK_COUNTER_READINGS_RESPONSE = [
 MOCK_COUNTER_READINGS_SINGLE_TARIFF_RESPONSE = [
     {
         "readings": [
-            {"name": "Основной", "value": "5000", "date": "24.01.26", "consumption": "200"},
+            {"title": "Основной ПУ 10000001", "value": 5000, "consumption": 200},
         ]
     }
 ]
