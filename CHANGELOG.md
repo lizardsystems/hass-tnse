@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
  - Обновлена зависимость `aiotnse` до версии 2.0.4.
 
+## [2.0.3] - 2026-03-25
+
 ### Fixed
 
  - Исправлен баг: при ошибках сервисов типа `HomeAssistantError` (например, «файл не найден в ответе API») событие `_failed` не генерировалось. Теперь все ошибки корректно стреляют событие `tns_energo_*_failed`.
