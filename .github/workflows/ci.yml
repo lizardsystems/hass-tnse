@@ -22,7 +22,7 @@ jobs:
           python-version: "3.14"
 
       - name: Install dependencies
-        run: pip install pytest pytest-asyncio pytest-homeassistant-custom-component aiotnse==2.0.4
+        run: pip install pytest pytest-asyncio "pytest-homeassistant-custom-component>=0.13.363" aiotnse==2.0.4
 
       - name: Run tests
         run: pytest tests/ -v
