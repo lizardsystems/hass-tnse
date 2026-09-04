@@ -23,32 +23,31 @@ from custom_components.tns_energo.services import (
 from .const import MOCK_COUNTERS_MULTI, MOCK_INVOICE_FILE_RESPONSE, MOCK_SEND_READINGS_RESPONSE
 
 
+async def _get_device_id(hass: HomeAssistant, identifier: str) -> str:
+    """Get device ID for a DOMAIN identifier."""
+    from homeassistant.helpers import device_registry as dr
+
+    device_registry = dr.async_get(hass)
+    entry = hass.config_entries.async_entries(DOMAIN)[0]
+    device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, identifier), entry.entry_id
+    )
+    assert device is not None
+    return device.id
+
+
 async def _get_account_device_id(
     hass: HomeAssistant, account_number: str = "610000000001"
 ) -> str:
     """Get device ID for an account."""
-    from homeassistant.helpers import device_registry as dr
-
-    device_registry = dr.async_get(hass)
-    device = device_registry.async_get_device(
-        identifiers={(DOMAIN, account_number)}
-    )
-    assert device is not None
-    return device.id
+    return await _get_device_id(hass, account_number)
 
 
 async def _get_counter_device_id(
     hass: HomeAssistant, counter_id: str = "10000001"
 ) -> str:
     """Get device ID for a counter sub-device."""
-    from homeassistant.helpers import device_registry as dr
-
-    device_registry = dr.async_get(hass)
-    device = device_registry.async_get_device(
-        identifiers={(DOMAIN, counter_id)}
-    )
-    assert device is not None
-    return device.id
+    return await _get_device_id(hass, counter_id)
 
 
 async def test_service_refresh(

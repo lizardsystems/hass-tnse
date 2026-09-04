@@ -11,6 +11,7 @@ from homeassistant.helpers import device_registry as dr
 
 from .const import DOMAIN, PLATFORMS
 from .coordinator import TNSECoordinator
+from .entity import account_device_info
 from .services import async_setup_services
 
 _LOGGER = logging.getLogger(__name__)
@@ -58,6 +59,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: TNSEConfigEntry) -> bool
     entry.runtime_data = coordinator
 
     _async_remove_stale_devices(hass, entry, coordinator)
+    _async_register_account_devices(hass, entry, coordinator)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -65,6 +67,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: TNSEConfigEntry) -> bool
 
     _LOGGER.debug("Config entry %s setup complete", entry.entry_id)
     return True
+
+
+def _async_register_account_devices(
+    hass: HomeAssistant,
+    entry: TNSEConfigEntry,
+    coordinator: TNSECoordinator,
+) -> None:
+    """Register the account devices.
+
+    Counter devices link to their account with `via_device_id`, which needs the
+    account device to exist before the platforms add their entities.
+    """
+    device_registry = dr.async_get(hass)
+
+    for account in coordinator.data or []:
+        device_registry.async_get_or_create(
+            config_entry_id=entry.entry_id,
+            **account_device_info(coordinator, account.number),
+        )
 
 
 def _async_remove_stale_devices(

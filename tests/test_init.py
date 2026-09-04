@@ -144,8 +144,8 @@ async def test_stale_device_removal(
     )
 
     # Verify stale device exists
-    stale_device = device_registry.async_get_device(
-        identifiers={(DOMAIN, "999999999999")}
+    stale_device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "999999999999"), mock_config_entry.entry_id
     )
     assert stale_device is not None
 
@@ -154,14 +154,14 @@ async def test_stale_device_removal(
     await hass.async_block_till_done()
 
     # Stale device should be removed
-    stale_device = device_registry.async_get_device(
-        identifiers={(DOMAIN, "999999999999")}
+    stale_device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "999999999999"), mock_config_entry.entry_id
     )
     assert stale_device is None
 
     # Valid device should still exist
-    valid_device = device_registry.async_get_device(
-        identifiers={(DOMAIN, "610000000001")}
+    valid_device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "610000000001"), mock_config_entry.entry_id
     )
     assert valid_device is not None
 
@@ -183,8 +183,8 @@ async def test_stale_counter_device_removal(
     device_registry = dr.async_get(hass)
 
     # Verify valid counter device exists
-    valid_counter = device_registry.async_get_device(
-        identifiers={(DOMAIN, "10000001")}
+    valid_counter = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "10000001"), mock_config_entry.entry_id
     )
     assert valid_counter is not None
 
@@ -194,8 +194,8 @@ async def test_stale_counter_device_removal(
         identifiers={(DOMAIN, "99999999")},
     )
 
-    stale_device = device_registry.async_get_device(
-        identifiers={(DOMAIN, "99999999")}
+    stale_device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "99999999"), mock_config_entry.entry_id
     )
     assert stale_device is not None
 
@@ -204,20 +204,20 @@ async def test_stale_counter_device_removal(
     await hass.async_block_till_done()
 
     # Stale counter device should be removed
-    stale_device = device_registry.async_get_device(
-        identifiers={(DOMAIN, "99999999")}
+    stale_device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "99999999"), mock_config_entry.entry_id
     )
     assert stale_device is None
 
     # Valid counter device should still exist
-    valid_counter = device_registry.async_get_device(
-        identifiers={(DOMAIN, "10000001")}
+    valid_counter = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "10000001"), mock_config_entry.entry_id
     )
     assert valid_counter is not None
 
     # Valid account device should still exist
-    valid_account = device_registry.async_get_device(
-        identifiers={(DOMAIN, "610000000001")}
+    valid_account = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "610000000001"), mock_config_entry.entry_id
     )
     assert valid_account is not None
 

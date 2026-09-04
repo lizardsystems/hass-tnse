@@ -222,8 +222,8 @@ async def test_get_counter_data(
     device_registry = dr.async_get(hass)
 
     # Get counter device (created by sensor platform)
-    counter_device = device_registry.async_get_device(
-        identifiers={(DOMAIN, "10000001")}
+    counter_device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "10000001"), mock_config_entry.entry_id
     )
     assert counter_device is not None
 

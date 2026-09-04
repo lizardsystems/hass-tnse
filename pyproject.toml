@@ -4,7 +4,7 @@ version = "2.0.0"
 description = "TNS-Energo custom integration for Home Assistant"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 keywords = [
     "electricity",
     "energy",
@@ -17,7 +17,6 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Home Automation",
@@ -38,7 +37,7 @@ test = [
     "pytest",
     "pytest-asyncio",
     "pytest-homeassistant-custom-component",
-    "aiotnse==2.0.3",
+    "aiotnse==2.0.4",
 ]
 
 [tool.setuptools.packages.find]

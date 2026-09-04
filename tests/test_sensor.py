@@ -332,14 +332,14 @@ async def test_sensor_counter_sub_device(
     device_registry = dr.async_get(hass)
 
     # Account device
-    account_device = device_registry.async_get_device(
-        identifiers={(DOMAIN, "610000000001")}
+    account_device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "610000000001"), mock_config_entry.entry_id
     )
     assert account_device is not None
 
     # Counter sub-device
-    counter_device = device_registry.async_get_device(
-        identifiers={(DOMAIN, "10000001")}
+    counter_device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "10000001"), mock_config_entry.entry_id
     )
     assert counter_device is not None
     assert counter_device.via_device_id == account_device.id
@@ -377,21 +377,21 @@ async def test_sensor_multi_counter(
     device_registry = dr.async_get(hass)
 
     # Account device
-    account_device = device_registry.async_get_device(
-        identifiers={(DOMAIN, "610000000001")}
+    account_device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "610000000001"), mock_config_entry.entry_id
     )
     assert account_device is not None
 
     # Counter 1 sub-device (2-tariff)
-    counter1_device = device_registry.async_get_device(
-        identifiers={(DOMAIN, "10000001")}
+    counter1_device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "10000001"), mock_config_entry.entry_id
     )
     assert counter1_device is not None
     assert counter1_device.via_device_id == account_device.id
 
     # Counter 2 sub-device (1-tariff)
-    counter2_device = device_registry.async_get_device(
-        identifiers={(DOMAIN, "10000002")}
+    counter2_device = device_registry.async_get_device_by_identifier(
+        (DOMAIN, "10000002"), mock_config_entry.entry_id
     )
     assert counter2_device is not None
     assert counter2_device.via_device_id == account_device.id

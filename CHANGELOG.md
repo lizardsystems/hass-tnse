@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.5] - 2026-09-04
+
+### Fixed
+
+ - Исправлено исчезновение сенсоров счётчиков в Home Assistant 2026.9: показания и потребление помечались как «объект больше не предоставляется интеграцией» (#15). Устройства счётчиков связывались с лицевым счётом через параметр `via_device`, который в 2026.9 объявлен устаревшим: идентификаторы устройств больше не уникальны между config entry. При добавлении сущностей Home Assistant не находил в стеке вызовов кадр интеграции и вместо предупреждения выбрасывал `RuntimeError`, из-за чего все сущности счётчиков не создавались. Теперь устройства лицевых счетов регистрируются до настройки платформ, а счётчики ссылаются на них через `via_device_id`.
+
+### Changed
+
+ - Минимальная версия Home Assistant повышена до 2026.8.0: `via_device_id` появился именно в этой версии. Пользователям более старых версий Home Assistant остаётся доступна версия 2.0.4.
+ - Тесты переведены с устаревшего `device_registry.async_get_device` на `async_get_device_by_identifier`.
+ - CI переведён на Python 3.14, так как Home Assistant 2026.7 и новее требует Python 3.14.2. На Python 3.13 тесты запускались против устаревшей версии Home Assistant, поэтому проблема не была обнаружена заранее.
+
 ## [2.0.4] - 2026-06-28
 
 ### Fixed
