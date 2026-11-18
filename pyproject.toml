@@ -1,6 +1,6 @@
 [project]
 name = "hass-tnse"
-version = "2.0.0"
+version = "2.1.0"
 description = "TNS-Energo custom integration for Home Assistant"
 readme = "README.md"
 license = "MIT"
@@ -37,7 +37,7 @@ test = [
     "pytest",
     "pytest-asyncio",
     "pytest-homeassistant-custom-component",
-    "aiotnse==2.0.4",
+    "aiotnse==2.1.0",
 ]
 
 [tool.setuptools.packages.find]
