@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-11-20
+
+### Changed
+
+ - Репозиторий переехал в организацию [ru-smarthome](https://github.com/ru-smarthome). Ссылки на документацию и трекер ошибок в `manifest.json` ведут на новый адрес, старый адрес на GitHub перенаправляет на новый.
+ - Зависимость обновлена до `aiotnse==2.1.1`, в библиотеке изменились только метаданные пакета.
+
 ## [2.1.0] - 2026-11-18
 
 ### Fixed
