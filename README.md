@@ -24,12 +24,12 @@
 
 **Способ 1.** Через HACS:
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=lizardsystems&repository=hass-tnse&category=integration)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=ru-smarthome&repository=hass-tnse&category=integration)
 
 Нажмите кнопку выше → Установить → Перезагрузить Home Assistant.
 
 **Способ 2.** Вручную скопируйте папку `tns_energo`
-из [последнего релиза](https://github.com/lizardsystems/hass-tnse/releases/latest) в
+из [последнего релиза](https://github.com/ru-smarthome/hass-tnse/releases/latest) в
 директорию `/config/custom_components`.
 
 После установки перезагрузите Home Assistant.
@@ -635,7 +635,7 @@ logger:
 ```
 
 После возникновения проблемы найдите записи в журнале (`/config/home-assistant.log`)
-и создайте [запрос на исправление](https://github.com/lizardsystems/hass-tnse/issues).
+и создайте [запрос на исправление](https://github.com/ru-smarthome/hass-tnse/issues).
 
 ### Частые проблемы
 
@@ -651,6 +651,6 @@ logger:
 
 ## Дополнительная информация
 
-- Библиотека API: [aiotnse](https://github.com/lizardsystems/aiotnse)
+- Библиотека API: [aiotnse](https://github.com/ru-smarthome/aiotnse)
 - Сайт ТНС-Энерго: https://corp.tns-e.ru/onlayn-servisy/
-- Проблемы и предложения: https://github.com/lizardsystems/hass-tnse/issues
+- Проблемы и предложения: https://github.com/ru-smarthome/hass-tnse/issues

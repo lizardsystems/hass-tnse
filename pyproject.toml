@@ -24,13 +24,13 @@ classifiers = [
 ]
 
 [[project.authors]]
-name = "LizardSystems"
+name = "ru-smarthome"
 
 [project.urls]
-Repository = "https://github.com/lizardsystems/hass-tnse"
-Documentation = "https://github.com/lizardsystems/hass-tnse"
-"Bug Tracker" = "https://github.com/lizardsystems/hass-tnse/issues"
-Changelog = "https://github.com/lizardsystems/hass-tnse/blob/main/CHANGELOG.md"
+Repository = "https://github.com/ru-smarthome/hass-tnse"
+Documentation = "https://github.com/ru-smarthome/hass-tnse"
+"Bug Tracker" = "https://github.com/ru-smarthome/hass-tnse/issues"
+Changelog = "https://github.com/ru-smarthome/hass-tnse/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 test = [
